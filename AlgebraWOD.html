@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra 1 Math Workout Generator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- KaTeX Math Rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Printable Worksheet Media Query */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            /* Completely remove non-printable sections from layout flow to prevent overflow pages */
+            header, main, #projection-view, #solution-modal {
+                display: none !important;
+            }
+            #worksheet-modal {
+                position: static !important;
+                display: block !important;
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                max-height: none !important;
+                overflow: visible !important;
+            }
+            #worksheet-modal > div {
+                background: white !important;
+                border: none !important;
+                box-shadow: none !important;
+                max-width: 100% !important;
+                max-height: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                overflow: visible !important;
+            }
+            /* Hide modal top header bar and tab buttons during print */
+            #worksheet-modal .border-b,
+            #worksheet-modal .bg-slate-950\/60 {
+                display: none !important;
+            }
+            #printable-area {
+                position: static !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: 0 !important;
+                height: auto !important;
+                background: white !important;
+                color: black !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            /* Prevent breaking problem cards across page breaks */
+            #printable-area .grid > div {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+            .no-print { display: none !important; }
+            @page { size: letter portrait; margin: 0.4in; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <!-- MAIN APP HEADER -->
+    <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-30 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-indigo-500 to-purple-500 p-2 rounded-xl text-white shadow-lg shadow-indigo-500/20">
+                    <i data-lucide="dumbbell" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-tight text-white flex items-center gap-2">
+                        ALGEBRA 1 <span class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">MATH WORKOUT</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Interval Training for Math Mastery</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 flex-wrap justify-end">
+                <button onclick="downloadAppHtml()" title="Download live HTML app file to run offline" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs md:text-sm font-semibold rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                    <i data-lucide="download" class="w-4 h-4 text-indigo-400"></i> <span class="hidden sm:inline">Export</span> HTML
+                </button>
+                <button onclick="openWorksheetModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs md:text-sm font-semibold rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                    <i data-lucide="file-text" class="w-4 h-4 text-teal-400"></i> Worksheets
+                </button>
+                <button onclick="openSolutionModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs md:text-sm font-semibold rounded-lg transition border border-slate-700 flex items-center gap-1.5">
+                    <i data-lucide="key" class="w-4 h-4 text-amber-400"></i> Answer Key
+                </button>
+                <button onclick="startWorkoutProjection()" class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs md:text-sm font-extrabold rounded-lg shadow-lg shadow-emerald-500/20 transition flex items-center gap-1.5">
+                    <i data-lucide="play" class="w-4 h-4 fill-slate-950"></i> START WORKOUT
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONFIG & PREVIEW DASHBOARD -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- SETUP SIDEBAR (4 COLS) -->
+        <aside class="lg:col-span-4 space-y-6">
+            
+            <!-- TIMER & WORKOUT SETTINGS -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h2 class="text-base font-bold text-slate-200 mb-4 flex items-center gap-2">
+                    <i data-lucide="timer" class="w-5 h-5 text-indigo-400"></i> Workout Structure
+                </h2>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Work Time (sec)</label>
+                        <input type="number" id="work-time" value="45" min="10" max="300" onchange="updateSettings()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white font-mono-num font-bold focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Rest Time (sec)</label>
+                        <input type="number" id="rest-time" value="15" min="5" max="120" onchange="updateSettings()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white font-mono-num font-bold focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Total Rounds</label>
+                        <input type="number" id="round-count" value="10" min="1" max="50" onchange="updateSettings()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white font-mono-num font-bold focus:outline-none focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Difficulty</label>
+                        <select id="difficulty-select" onchange="updateSettings()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white font-bold focus:outline-none focus:border-indigo-500">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- MUSIC AUDIO TRACK SELECTION -->
+                <div class="pt-3 border-t border-slate-800">
+                    <label class="block text-xs font-semibold text-slate-400 mb-2 flex items-center justify-between">
+                        <span class="flex items-center gap-1.5"><i data-lucide="music" class="w-4 h-4 text-purple-400"></i> Synth Beat Track</span>
+                        <button onclick="testAudioTrack()" class="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
+                            <i data-lucide="volume-2" class="w-3.5 h-3.5"></i> Preview
+                        </button>
+                    </label>
+                    <select id="music-track-select" onchange="updateMusicSelection()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-white text-sm font-semibold focus:outline-none focus:border-indigo-500">
+                        <option value="pop">Dance Pop Pulse (128 BPM)</option>
+                        <option value="synthwave">80s Synthwave (120 BPM)</option>
+                        <option value="cardio">High-Energy Cardio (135 BPM)</option>
+                        <option value="chiptune">8-Bit Chiptune (140 BPM)</option>
+                        <option value="groove">Funky Groove (115 BPM)</option>
+                        <option value="none">No Audio (Silent)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- TOPICS SELECTION CONTAINER -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-base font-bold text-slate-200 flex items-center gap-2">
+                        <i data-lucide="list-checks" class="w-5 h-5 text-indigo-400"></i> Algebra Topics
+                    </h2>
+                    <button onclick="selectAllTopics()" id="select-all-btn" class="text-xs font-semibold text-indigo-400 hover:text-indigo-300">
+                        Toggle All
+                    </button>
+                </div>
+                
+                <div id="topics-list" class="space-y-2 max-h-[360px] overflow-y-auto pr-1">
+                    <!-- Populated dynamically by JS -->
+                </div>
+            </div>
+
+        </aside>
+
+        <!-- PROBLEMS PREVIEW CARDS (8 COLS) -->
+        <section class="lg:col-span-8 space-y-4">
+            <div class="flex items-center justify-between bg-slate-900 border border-slate-800 px-5 py-3.5 rounded-2xl">
+                <div>
+                    <h2 class="text-base font-bold text-white flex items-center gap-2">
+                        <i data-lucide="eye" class="w-5 h-5 text-teal-400"></i> Workout Sequence Preview
+                    </h2>
+                    <p class="text-xs text-slate-400">Generated <span id="preview-problem-count" class="font-bold text-slate-200">10</span> practice problems (pin to keep)</p>
+                </div>
+                <button onclick="generateWorkout()" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 text-xs font-bold rounded-lg border border-slate-700 transition flex items-center gap-1.5">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Regenerate Unlocked
+                </button>
+            </div>
+
+            <div id="problems-preview-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Preview Problem Cards generated by JS -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FULLSCREEN PROJECTION OVERLAY CONTAINER -->
+    <div id="projection-view" class="fixed inset-0 bg-slate-950 z-50 hidden flex-col justify-between p-6 md:p-10">
+        
+        <!-- PROJECTION TOP BAR -->
+        <div class="flex items-center justify-between bg-slate-900/90 border border-slate-800 rounded-2xl px-6 py-4 shadow-2xl backdrop-blur">
+            <div class="flex items-center gap-4">
+                <span id="proj-phase-badge" class="px-4 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-black uppercase tracking-widest rounded-full">
+                    WORK TIME
+                </span>
+                <span id="proj-round-indicator" class="text-lg font-bold text-slate-300 font-mono-num">
+                    ROUND 1 / 10
+                </span>
+            </div>
+
+            <!-- PROJECTION CONTROLS -->
+            <div class="flex items-center gap-3">
+                <button id="proj-mute-btn" onclick="toggleMuteWorkout()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm rounded-xl border border-slate-700 flex items-center gap-2 transition">
+                    <i data-lucide="volume-2" class="w-4 h-4 text-purple-400"></i> <span id="proj-mute-text">AUDIO ON</span>
+                </button>
+                <button id="proj-pause-btn" onclick="togglePauseWorkout()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl border border-slate-700 flex items-center gap-2 transition">
+                    <i data-lucide="pause" class="w-4 h-4 fill-white"></i> PAUSE
+                </button>
+                <button onclick="skipWorkoutStep()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl border border-slate-700 flex items-center gap-2 transition">
+                    <i data-lucide="skip-forward" class="w-4 h-4"></i> SKIP
+                </button>
+                <button onclick="exitWorkoutProjection()" class="px-4 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-sm rounded-xl flex items-center gap-2 transition">
+                    <i data-lucide="x-circle" class="w-4 h-4"></i> EXIT
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN PROJECTION DISPLAY AREA -->
+        <div class="flex-1 flex flex-col items-center justify-center my-4 overflow-hidden">
+            <!-- WORK PROBLEM CARD -->
+            <div id="proj-problem-card" class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center shadow-2xl space-y-4">
+                <div class="px-3 py-1 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold text-xs rounded-full uppercase tracking-wider" id="proj-topic-name">
+                    Linear Equations
+                </div>
+                <div id="proj-math-render" class="text-3xl md:text-5xl font-bold text-white text-center py-2 max-w-full overflow-x-auto"></div>
+                <div id="proj-svg-container" class="flex justify-center w-full max-h-[340px] hidden overflow-hidden"></div>
+            </div>
+
+            <!-- REST CARD -->
+            <div id="proj-rest-card" class="w-full max-w-2xl bg-slate-900/90 border border-amber-500/30 rounded-3xl p-8 flex flex-col items-center justify-center shadow-2xl text-center space-y-3 hidden">
+                <div class="w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-2">
+                    <i data-lucide="coffee" class="w-8 h-8"></i>
+                </div>
+                <h3 class="text-3xl font-black text-amber-400 tracking-tight">RECOVERY INTERVAL</h3>
+                <p class="text-slate-400 text-sm font-medium">Catch your breath, check your work, and prepare for the next round!</p>
+            </div>
+        </div>
+
+        <!-- BOTTOM TIMER DISPLAY -->
+        <div class="shrink-0 flex flex-col items-center justify-center bg-slate-900/80 border border-slate-800 rounded-2xl py-4 px-8 max-w-md mx-auto w-full backdrop-blur">
+            <div id="proj-status-label" class="text-xl font-black uppercase tracking-widest text-emerald-400 mb-1">
+                BEGIN
+            </div>
+            <div id="proj-timer-digits" class="text-6xl md:text-7xl font-black font-mono-num text-white tracking-tight">
+                45
+            </div>
+        </div>
+    </div>
+
+    <!-- WORKSHEET GENERATOR MODAL -->
+    <div id="worksheet-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur z-50 hidden flex items-center justify-center p-3 md:p-6">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-5xl max-h-[92vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            <!-- Modal Header -->
+            <div class="p-4 md:p-5 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-900">
+                <div>
+                    <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
+                        <i data-lucide="file-text" class="w-5 h-5 text-teal-400"></i> Printable 8.5x11 Student Worksheet
+                    </h3>
+                    <p class="text-xs text-slate-400">Preview and print or download as PDF for paper-based workouts</p>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <button onclick="printWorksheet()" class="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-extrabold text-xs md:text-sm rounded-xl shadow-lg transition flex items-center gap-2">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Print / Save as PDF
+                    </button>
+                    <button onclick="closeWorksheetModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mode Selector Tabs -->
+            <div class="px-6 py-3 bg-slate-950/60 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Format:</span>
+                    <button id="ws-tab-problems" onclick="setWorksheetMode('problems')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-indigo-500 text-white shadow">
+                        Full Problem Worksheet
+                    </button>
+                    <button id="ws-tab-blank" onclick="setWorksheetMode('blank')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700">
+                        Blank Recording Template (Live Timer Companion)
+                    </button>
+                    <button id="ws-tab-answers" onclick="setWorksheetMode('answers')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700">
+                        Answer Key
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label for="ws-title-input" class="text-xs font-bold text-slate-400 uppercase tracking-wider">Title:</label>
+                    <input type="text" id="ws-title-input" value="Algebra 1 Math Workout" oninput="updateWorksheetTitle(this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-xs text-white font-semibold focus:outline-none focus:border-indigo-500 w-56 md:w-64" placeholder="Custom Worksheet Title">
+                </div>
+            </div>
+
+            <!-- Printable Sheet Live Preview Box -->
+            <div class="p-6 overflow-y-auto flex-1 bg-slate-950 flex justify-center">
+                <!-- PRINTABLE CONTAINER (Targeted by @media print) -->
+                <div id="printable-area" class="bg-white text-slate-900 rounded-xl p-8 max-w-3xl w-full shadow-2xl min-h-[10.5in] border border-slate-200">
+                    <!-- Dynamic Worksheet Content Rendered by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANSWER KEY MODAL -->
+    <div id="solution-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i> Workout Solutions & Answer Key
+                </h3>
+                <div class="flex items-center gap-3">
+                    <button onclick="printAnswerKey()" class="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs md:text-sm rounded-xl shadow transition flex items-center gap-1.5">
+                        <i data-lucide="printer" class="w-4 h-4"></i> Print Answer Key
+                    </button>
+                    <button onclick="closeSolutionModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="solution-modal-list" class="p-6 overflow-y-auto space-y-4 flex-1">
+                <!-- Solutions rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT APPLICATION LOGIC -->
+    <script>
+        // TOPICS MASTER ARRAY
+        const ALGEBRA_TOPICS = [
+            { id: 'integers', name: 'Integer Operations (+, -, ×, ÷)' },
+            { id: 'fractions', name: 'Fraction Operations (+, -, ×, ÷)' },
+            { id: 'pemdas', name: 'Order of Operations (PEMDAS)' },
+            { id: 'prime_factor', name: 'Prime Factorization (2-Digit Prime Factors)' },
+            { id: 'lin_eq', name: 'Linear Equations (1-Var)' },
+            { id: 'lin_ineq', name: 'Linear Inequalities' },
+            { id: 'slope_two_points', name: 'Slope: Between Two Points' },
+            { id: 'slope_intercept_eq', name: 'Slope: Slope-Intercept Form (y = mx + b)' },
+            { id: 'slope_point_form', name: 'Slope: Point-Slope Form' },
+            { id: 'slope_standard_intercepts', name: 'Slope: Standard Form & Intercepts' },
+            { id: 'slope_table', name: 'Slope: From Table of Values' },
+            { id: 'slope_visual_graph', name: 'Slope: Visual Graph (Find m)' },
+            { id: 'sys_eq', name: 'Systems of Equations (2x2)' },
+            { id: 'exp_rules', name: 'Exponent Rules' },
+            { id: 'factor_quad', name: 'Factoring Quadratics (a = 1)' },
+            { id: 'solve_quad', name: 'Solving Quadratics (Factoring/Formula)' },
+            { id: 'func_eval', name: 'Function Notation & Evaluation' },
+            { id: 'arith_seq', name: 'Arithmetic Sequences (a_n = a_1 + (n-1)d)' }
+        ];
+
+        // STATE APP CONFIG
+        let currentSettings = {
+            workTime: 45,
+            restTime: 15,
+            rounds: 10,
+            difficulty: 'medium',
+            selectedTopics: ALGEBRA_TOPICS.map(t => t.id),
+            musicTrack: 'pop'
+        };
+
+        let generatedProblems = [];
+
+        // RANDOM NUMBER UTILS
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function gcd(a, b) {
+            a = Math.abs(a);
+            b = Math.abs(b);
+            while (b) {
+                let t = b;
+                b = a % b;
+                a = t;
+            }
+            return a;
+        }
+
+        // PROBLEM GENERATOR FOR ALL TOPICS
+        function generateProblem(topicId, diff) {
+            const topicObj = ALGEBRA_TOPICS.find(t => t.id === topicId) || ALGEBRA_TOPICS[0];
+            let latex = '';
+            let solution = '';
+            let svg = null;
+
+            switch (topicId) {
+                case 'integers': {
+                    const a = randInt(-15, 15);
+                    const b = randInt(-15, 15);
+                    const op = ['+', '-', '\\times', '\\div'][randInt(0, 3)];
+                    if (op === '\\div') {
+                        const divisor = b === 0 ? 2 : b;
+                        const prod = a * divisor;
+                        latex = `${prod} \\div (${divisor < 0 ? divisor : divisor})`;
+                        solution = `${a}`;
+                    } else if (op === '\\times') {
+                        latex = `(${a}) \\times (${b})`;
+                        solution = `${a * b}`;
+                    } else if (op === '+') {
+                        latex = `${a} + (${b})`;
+                        solution = `${a + b}`;
+                    } else {
+                        latex = `${a} - (${b})`;
+                        solution = `${a - b}`;
+                    }
+                    break;
+                }
+                case 'fractions': {
+                    const num1 = randInt(1, 5), den1 = randInt(2, 6);
+                    const num2 = randInt(1, 5), den2 = randInt(2, 6);
+                    const op = randInt(0, 1) === 0 ? '+' : '-';
+                    if (op === '+') {
+                        latex = `\\frac{${num1}}{${den1}} + \\frac{${num2}}{${den2}}`;
+                        const resNum = num1 * den2 + num2 * den1;
+                        const resDen = den1 * den2;
+                        const g = gcd(resNum, resDen);
+                        solution = `\\frac{${resNum/g}}{${resDen/g}}`;
+                    } else {
+                        latex = `\\frac{${num1}}{${den1}} - \\frac{${num2}}{${den2}}`;
+                        const resNum = num1 * den2 - num2 * den1;
+                        const resDen = den1 * den2;
+                        const g = gcd(Math.abs(resNum), resDen);
+                        solution = `\\frac{${resNum/g}}{${resDen/g}}`;
+                    }
+                    break;
+                }
+                case 'pemdas': {
+                    const templates = [
+                        () => {
+                            const a = randInt(2, 6), b = randInt(2, 5), c = randInt(2, 4);
+                            return { l: `${a}^2 - ${b} \\times ${c}`, s: `${a*a - b*c}` };
+                        },
+                        () => {
+                            const c = randInt(2, 5), b = randInt(1, 5) * c, a = randInt(5, 15);
+                            return { l: `${a} + ${b} \\div ${c}`, s: `${a + (b / c)}` };
+                        },
+                        () => {
+                            const c = randInt(2, 4), b = randInt(1, 4) * c, a = randInt(2, 5);
+                            return { l: `${a} \\times (${b} - ${c}) \\div ${c}`, s: `${a * (b - c) / c}` };
+                        },
+                        () => {
+                            const a = randInt(2, 5), b = randInt(1, 4), c = randInt(2, 4);
+                            return { l: `${a} \\times (${b} + ${c}) - ${a * 2}`, s: `${a * (b + c) - (a * 2)}` };
+                        },
+                        () => {
+                            const c = randInt(2, 4), num = randInt(1, 5) * c, diffVal = randInt(1, 4);
+                            const b = num + diffVal, a = randInt(10, 25);
+                            return { l: `${a} - (${b} - ${diffVal}) \\div ${c}`, s: `${a - (num / c)}` };
+                        },
+                        () => {
+                            const a = randInt(2, 6), b = randInt(2, 5), c = randInt(2, 5);
+                            return { l: `${a} \\times ${b} - ${c}^2`, s: `${a * b - c * c}` };
+                        }
+                    ];
+                    const chosen = templates[randInt(0, templates.length - 1)]();
+                    latex = chosen.l;
+                    solution = chosen.s;
+                    break;
+                }
+                case 'prime_factor': {
+                    const primes = [2, 3, 5, 7, 11];
+                    const p1 = primes[randInt(0, primes.length - 1)];
+                    const p2 = primes[randInt(0, primes.length - 1)];
+                    const p3 = primes[randInt(0, 2)];
+                    const val = p1 * p2 * p3;
+                    latex = `\\text{Find prime factors of } ${val}`;
+                    const sorted = [p1, p2, p3].sort((x,y) => x - y);
+                    solution = sorted.join(' \\times ');
+                    break;
+                }
+                case 'lin_eq': {
+                    if (diff === 'hard') {
+                        // Multi-step: Distribution and variables on both sides
+                        const x = randInt(-6, 8);
+                        const a = randInt(2, 5); // multiplier for distribution
+                        const c = randInt(-6, 6) || 3; // inside constant
+                        const d = randInt(-8, 8); // outside constant
+                        
+                        // Left side expression value: a * (x + c) + d
+                        const leftVal = a * (x + c) + d;
+                        
+                        // Right side: e * x + f, pick 'e' different from 'a'
+                        let e = randInt(2, 6);
+                        if (e === a) e = a + 1;
+                        const f = leftVal - (e * x);
+
+                        const signC = c >= 0 ? `+ ${c}` : `- ${Math.abs(c)}`;
+                        const signD = d === 0 ? '' : (d > 0 ? `+ ${d}` : `- ${Math.abs(d)}`);
+                        const signF = f === 0 ? '' : (f > 0 ? `+ ${f}` : `- ${Math.abs(f)}`);
+
+                        latex = `${a}(x ${signC}) ${signD} = ${e}x ${signF}`;
+                        solution = `x = ${x}`;
+                    } else if (diff === 'medium') {
+                        // Two-step or distribution on one side
+                        const x = randInt(-5, 8);
+                        const a = randInt(2, 5);
+                        const b = randInt(-10, 10);
+                        const rhs = a * x + b;
+                        latex = `${a}x ${b >= 0 ? '+ ' + b : '- ' + Math.abs(b)} = ${rhs}`;
+                        solution = `x = ${x}`;
+                    } else {
+                        // Easy: One-step
+                        const x = randInt(-8, 12);
+                        const a = randInt(-12, 12) || 5;
+                        const rhs = x + a;
+                        latex = `x ${a >= 0 ? '+ ' + a : '- ' + Math.abs(a)} = ${rhs}`;
+                        solution = `x = ${x}`;
+                    }
+                    break;
+                }
+                case 'lin_ineq': {
+                    const m = randInt(2, 5);
+                    const x = randInt(-4, 6);
+                    const b = randInt(-8, 8);
+                    const ops = ['<', '>', '\\le', '\\ge'];
+                    const op = ops[randInt(0, ops.length - 1)];
+                    const rhs = m * x + b;
+                    latex = `${m}x ${b >= 0 ? '+ ' + b : '- ' + Math.abs(b)} ${op} ${rhs}`;
+                    solution = `x ${op} ${x}`;
+                    break;
+                }
+                case 'slope_two_points': {
+                    const x1 = randInt(-5, 5), y1 = randInt(-5, 5);
+                    const m = randInt(-3, 3) || 1;
+                    const dx = randInt(1, 4);
+                    const x2 = x1 + dx;
+                    const y2 = y1 + m * dx;
+                    latex = `( ${x1}, ${y1} ) \\text{ and } ( ${x2}, ${y2} )`;
+                    solution = `m = ${m}`;
+                    break;
+                }
+                case 'slope_intercept_eq': {
+                    const m = randInt(-4, 4);
+                    const b = randInt(-6, 6);
+                    latex = `y = ${m === 0 ? '' : (m === 1 ? '' : m === -1 ? '-' : m) + 'x'} ${b >= 0 ? '+ ' + b : '- ' + Math.abs(b)}`;
+                    solution = `m = ${m},\\, b = ${b}`;
+                    break;
+                }
+                case 'slope_point_form': {
+                    const m = randInt(-4, 4) || 2;
+                    const x1 = randInt(-5, 5), y1 = randInt(-5, 5);
+                    latex = `y ${y1 >= 0 ? '- ' + y1 : '+ ' + Math.abs(y1)} = ${m}(x ${x1 >= 0 ? '- ' + x1 : '+ ' + Math.abs(x1)})`;
+                    solution = `m = ${m},\\, (${x1}, ${y1})`;
+                    break;
+                }
+                case 'slope_standard_intercepts': {
+                    const a = randInt(2, 5), b = randInt(2, 5);
+                    const c = a * b * randInt(1, 3);
+                    latex = `${a}x + ${b}y = ${c}`;
+                    solution = `x\\text{-int}: (${c/a}, 0),\\, y\\text{-int}: (0, ${c/b})`;
+                    break;
+                }
+                case 'slope_table': {
+                    const m = randInt(-3, 3) || 2;
+                    const b = randInt(-4, 4);
+                    const x1 = 0, y1 = b;
+                    const x2 = 2, y2 = 2 * m + b;
+                    const x3 = 4, y3 = 4 * m + b;
+                    latex = `\\begin{array}{c|c} x & y \\\\ \\hline ${x1} & ${y1} \\\\ ${x2} & ${y2} \\\\ ${x3} & ${y3} \\end{array}`;
+                    solution = `m = ${m}`;
+                    break;
+                }
+                case 'slope_visual_graph': {
+                    // Pick slope m and intercept b such that both chosen x points yield y within grid bounds (-5 to 5)
+                    const m = randInt(-2, 2) || 1;
+                    const b = randInt(-2, 2);
+                    
+                    // Choose x1 and x2 such that y1 and y2 remain strictly within [-5, 5]
+                    let x1 = randInt(-4, -1);
+                    let x2 = randInt(1, 4);
+                    
+                    // Ensure y coordinates stay within grid bounds [-5, 5]
+                    let y1 = m * x1 + b;
+                    let y2 = m * x2 + b;
+                    
+                    if (y1 > 5 || y1 < -5) {
+                        x1 = y1 > 5 ? Math.floor((5 - b) / m) : Math.ceil((-5 - b) / m);
+                        y1 = m * x1 + b;
+                    }
+                    if (y2 > 5 || y2 < -5) {
+                        x2 = y2 > 5 ? Math.floor((5 - b) / m) : Math.ceil((-5 - b) / m);
+                        y2 = m * x2 + b;
+                    }
+
+                    latex = `\\text{\\small Find } m \\text{\\small  from graph}`;
+                    solution = `m = ${m}`;
+
+                    // SVG coordinate plane generator - enlarged canvas with ordered pair labels
+                    const w = 340, h = 340, gridMax = 6;
+                    const cx = w / 2, cy = h / 2;
+                    const step = w / (gridMax * 2);
+
+                    const px1 = cx + x1 * step;
+                    const py1 = cy - y1 * step;
+                    const px2 = cx + x2 * step;
+                    const py2 = cy - y2 * step;
+
+                    // Line endpoints for full graph extent
+                    const lx1 = cx - gridMax * step;
+                    const ly1 = cy - (-gridMax * m + b) * step;
+                    const lx2 = cx + gridMax * step;
+                    const ly2 = cy - (gridMax * m + b) * step;
+
+                    // Text offsets for point coordinate tags
+                    const label1Y = py1 > cy ? py1 + 18 : py1 - 10;
+                    const label2Y = py2 > cy ? py2 + 18 : py2 - 10;
+
+                    svg = `
+                        <svg viewBox="0 0 ${w} ${h}" class="w-full h-auto max-w-[340px] md:max-w-[380px] bg-white rounded-2xl border border-slate-300 p-2 shadow-inner">
+                            <rect width="${w}" height="${h}" fill="#ffffff" rx="12"/>
+                            <!-- Grid lines -->
+                            ${Array.from({length: gridMax * 2 + 1}, (_, i) => {
+                                const pos = i * step;
+                                return `
+                                    <line x1="${pos}" y1="0" x2="${pos}" y2="${h}" stroke="#000000" stroke-opacity="0.15" stroke-width="1.2"/>
+                                    <line x1="0" y1="${pos}" x2="${w}" y2="${pos}" stroke="#000000" stroke-opacity="0.15" stroke-width="1.2"/>
+                                `;
+                            }).join('')}
+                            <!-- Axes -->
+                            <line x1="0" y1="${cy}" x2="${w}" y2="${cy}" stroke="#0f172a" stroke-width="2.5"/>
+                            <line x1="${cx}" y1="0" x2="${cx}" y2="${h}" stroke="#0f172a" stroke-width="2.5"/>
+                            <!-- Function Line -->
+                            <line x1="${lx1}" y1="${ly1}" x2="${lx2}" y2="${ly2}" stroke="#4f46e5" stroke-width="3.5"/>
+                            
+                            <!-- Highlighted Points -->
+                            <circle cx="${px1}" cy="${py1}" r="6" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>
+                            <circle cx="${px2}" cy="${py2}" r="6" fill="#f59e0b" stroke="#ffffff" stroke-width="2"/>
+
+                            <!-- Point Ordered Pair Labels -->
+                            <rect x="${px1 - 28}" y="${label1Y - 12}" width="56" height="18" rx="4" fill="#0f172a" opacity="0.85"/>
+                            <text x="${px1}" y="${label1Y}" fill="#f8fafc" font-size="12" font-weight="bold" font-family="monospace" text-anchor="middle">(${x1}, ${y1})</text>
+                            
+                            <rect x="${px2 - 28}" y="${label2Y - 12}" width="56" height="18" rx="4" fill="#0f172a" opacity="0.85"/>
+                            <text x="${px2}" y="${label2Y}" fill="#f8fafc" font-size="12" font-weight="bold" font-family="monospace" text-anchor="middle">(${x2}, ${y2})</text>
+                        </svg>
+                    `;
+                    break;
+                }
+                case 'sys_eq': {
+                    const x = randInt(-5, 5);
+                    const y = randInt(-5, 5);
+                    const isSub = Math.random() < 0.5;
+                    
+                    if (isSub) {
+                        // Substitution form: y = mx + b
+                        const m = randInt(-3, 3) || 2;
+                        const b1 = y - m * x;
+                        
+                        const a2 = randInt(2, 4);
+                        const b2 = randInt(-3, 3) || -2;
+                        const c2 = a2 * x + b2 * y;
+                        
+                        const b1Sign = b1 >= 0 ? `+ ${b1}` : `- ${Math.abs(b1)}`;
+                        const b2Sign = b2 >= 0 ? `+ ${b2}` : `- ${Math.abs(b2)}`;
+                        
+                        latex = `\\begin{cases} y = ${m === 1 ? '' : m === -1 ? '-' : m}x ${b1Sign} \\\\ ${a2}x ${b2Sign}y = ${c2} \\end{cases}`;
+                    } else {
+                        // Standard form / Elimination: A1 x + B1 y = C1, A2 x + B2 y = C2
+                        const a1 = randInt(2, 4);
+                        const b1 = randInt(-3, 3) || 2;
+                        const c1 = a1 * x + b1 * y;
+                        
+                        let a2 = randInt(-3, 4) || -2;
+                        if (a2 === a1) a2 = a1 + 1;
+                        const b2 = randInt(-3, 3) || -3;
+                        const c2 = a2 * x + b2 * y;
+                        
+                        const b1Sign = b1 >= 0 ? `+ ${b1}` : `- ${Math.abs(b1)}`;
+                        const b2Sign = b2 >= 0 ? `+ ${b2}` : `- ${Math.abs(b2)}`;
+                        
+                        latex = `\\begin{cases} ${a1}x ${b1Sign}y = ${c1} \\\\ ${a2}x ${b2Sign}y = ${c2} \\end{cases}`;
+                    }
+                    solution = `(x, y) = (${x}, ${y})`;
+                    break;
+                }
+                case 'exp_rules': {
+                    const type = randInt(0, 2);
+                    const base = ['x', 'y', 'a'][randInt(0, 2)];
+                    if (type === 0) {
+                        // Multiplication Rule
+                        const a = randInt(2, 5), b = randInt(2, 4);
+                        latex = `${base}^{${a}} \\cdot ${base}^{${b}}`;
+                        solution = `${base}^{${a+b}}`;
+                    } else if (type === 1) {
+                        // Division Rule
+                        const bot = randInt(2, 5);
+                        const top = bot + randInt(1, 5);
+                        const diff = top - bot;
+                        latex = `\\frac{${base}^{${top}}}{${base}^{${bot}}}`;
+                        solution = diff === 1 ? `${base}` : `${base}^{${diff}}`;
+                    } else {
+                        // Power of a Power Rule
+                        const a = randInt(2, 5), b = randInt(2, 4);
+                        latex = `(${base}^{${a}})^{${b}}`;
+                        solution = `${base}^{${a*b}}`;
+                    }
+                    break;
+                }
+                case 'factor_quad': {
+                    if (diff === 'hard') {
+                        const a = randInt(2, 4);
+                        const p = randInt(-5, 5) || 2;
+                        const q = randInt(-5, 5) || -3;
+                        const b = a * q + p;
+                        const c = p * q;
+                        
+                        let bStr = '';
+                        if (b === 1) bStr = '+ x';
+                        else if (b === -1) bStr = '- x';
+                        else if (b > 0) bStr = `+ ${b}x`;
+                        else if (b < 0) bStr = `- ${Math.abs(b)}x`;
+                        
+                        let cStr = '';
+                        if (c > 0) cStr = `+ ${c}`;
+                        else if (c < 0) cStr = `- ${Math.abs(c)}`;
+                        
+                        latex = `${a}x^2 ${bStr} ${cStr}`.replace(/\s+/g, ' ').trim();
+                        
+                        const pSign = p >= 0 ? `+ ${p}` : `- ${Math.abs(p)}`;
+                        const qSign = q >= 0 ? `+ ${q}` : `- ${Math.abs(q)}`;
+                        solution = `(${a}x ${pSign})(x ${qSign})`;
+                    } else {
+                        const r1 = randInt(-5, 5) || 1;
+                        const r2 = randInt(-5, 5) || 2;
+                        const b = -(r1 + r2);
+                        const c = r1 * r2;
+                        
+                        let bStr = '';
+                        if (b === 1) bStr = '+ x';
+                        else if (b === -1) bStr = '- x';
+                        else if (b > 0) bStr = `+ ${b}x`;
+                        else if (b < 0) bStr = `- ${Math.abs(b)}x`;
+                        
+                        let cStr = '';
+                        if (c > 0) cStr = `+ ${c}`;
+                        else if (c < 0) cStr = `- ${Math.abs(c)}`;
+                        
+                        latex = `x^2 ${bStr} ${cStr}`.replace(/\s+/g, ' ').trim();
+                        solution = `(x ${r1 >= 0 ? '- ' + r1 : '+ ' + Math.abs(r1)})(x ${r2 >= 0 ? '- ' + r2 : '+ ' + Math.abs(r2)})`;
+                    }
+                    break;
+                }
+                case 'solve_quad': {
+                    if (diff === 'hard') {
+                        const a = randInt(2, 4);
+                        const p = randInt(-5, 5) || 1;
+                        const q = randInt(-4, 4);
+                        
+                        const b = a * q + p;
+                        const c = p * q;
+                        
+                        let bStr = '';
+                        if (b === 1) bStr = '+ x';
+                        else if (b === -1) bStr = '- x';
+                        else if (b > 0) bStr = `+ ${b}x`;
+                        else if (b < 0) bStr = `- ${Math.abs(b)}x`;
+                        
+                        let cStr = '';
+                        if (c > 0) cStr = `+ ${c}`;
+                        else if (c < 0) cStr = `- ${Math.abs(c)}`;
+                        
+                        latex = `${a}x^2 ${bStr} ${cStr} = 0`.replace(/\s+/g, ' ').trim();
+                        
+                        // Root 1 from (ax + p) = 0 => x = -p / a
+                        let root1Str = '';
+                        const num1 = -p;
+                        const den1 = a;
+                        if (num1 % den1 === 0) {
+                            root1Str = `${num1 / den1}`;
+                        } else {
+                            const g = gcd(Math.abs(num1), den1);
+                            const n = num1 / g;
+                            const d = den1 / g;
+                            root1Str = n < 0 ? `-\\frac{${Math.abs(n)}}{${d}}` : `\\frac{${n}}{${d}}`;
+                        }
+                        
+                        // Root 2 from (x + q) = 0 => x = -q
+                        const root2Str = `${-q}`;
+                        
+                        if (root1Str === root2Str) {
+                            solution = `x = ${root1Str}`;
+                        } else {
+                            solution = `x = ${root1Str},\\, x = ${root2Str}`;
+                        }
+                    } else {
+                        const r1 = randInt(-4, 4);
+                        const r2 = randInt(-4, 4);
+                        const b = -(r1 + r2);
+                        const c = r1 * r2;
+                        
+                        let bStr = '';
+                        if (b === 1) bStr = '+ x';
+                        else if (b === -1) bStr = '- x';
+                        else if (b > 0) bStr = `+ ${b}x`;
+                        else if (b < 0) bStr = `- ${Math.abs(b)}x`;
+                        
+                        let cStr = '';
+                        if (c > 0) cStr = `+ ${c}`;
+                        else if (c < 0) cStr = `- ${Math.abs(c)}`;
+                        
+                        latex = `x^2 ${bStr} ${cStr} = 0`.replace(/\s+/g, ' ').trim();
+                        solution = r1 === r2 ? `x = ${r1}` : `x = ${r1},\\, x = ${r2}`;
+                    }
+                    break;
+                }
+                case 'func_eval': {
+                    const m = randInt(-4, 5);
+                    const b = randInt(-6, 6);
+                    const inputVal = randInt(-3, 5);
+                    latex = `f(x) = ${m}x ${b >= 0 ? '+ ' + b : '- ' + Math.abs(b)}, \\text{ find } f(${inputVal})`;
+                    solution = `f(${inputVal}) = ${m * inputVal + b}`;
+                    break;
+                }
+                case 'arith_seq': {
+                    const a1 = randInt(1, 10);
+                    const d = randInt(2, 6);
+                    const n = randInt(5, 12);
+                    latex = `a_1 = ${a1}, d = ${d}. \\text{ Find } a_{${n}}`;
+                    solution = `a_{${n}} = ${a1 + (n - 1) * d}`;
+                    break;
+                }
+                default: {
+                    const a = randInt(1, 10);
+                    const b = randInt(1, 10);
+                    latex = `${a}x + ${b} = 0`;
+                    solution = `x = -\\frac{${b}}{${a}}`;
+                    break;
+                }
+            }
+
+            return {
+                topicId,
+                topicName: topicObj.name,
+                latex,
+                solution,
+                svg
+            };
+        }
+
+        // GENERATE WORKOUT DECK
+        function generateWorkout() {
+            if (!currentSettings.selectedTopics || currentSettings.selectedTopics.length === 0) {
+                currentSettings.selectedTopics = [ALGEBRA_TOPICS[0].id];
+            }
+            
+            const newProblems = [];
+            const count = currentSettings.rounds;
+
+            for (let i = 0; i < count; i++) {
+                if (generatedProblems[i] && generatedProblems[i].isKept) {
+                    newProblems.push(generatedProblems[i]);
+                } else {
+                    const topicId = currentSettings.selectedTopics[i % currentSettings.selectedTopics.length];
+                    const prob = generateProblem(topicId, currentSettings.difficulty);
+                    prob.isKept = false;
+                    newProblems.push(prob);
+                }
+            }
+
+            generatedProblems = newProblems;
+            renderPreviewList();
+        }
+
+        function toggleKeepProblem(idx) {
+            if (generatedProblems[idx]) {
+                generatedProblems[idx].isKept = !generatedProblems[idx].isKept;
+                renderPreviewList();
+            }
+        }
+
+        // INITIALIZE APPLICATION
+        window.addEventListener('DOMContentLoaded', () => {
+            renderTopicsList();
+            generateWorkout();
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        });
+
+        // TOPIC LIST RENDERER & TOGGLES
+        function renderTopicsList() {
+            const container = document.getElementById('topics-list');
+            if (!container) return;
+            container.innerHTML = ALGEBRA_TOPICS.map(topic => {
+                const isChecked = currentSettings.selectedTopics.includes(topic.id);
+                return `
+                    <label class="flex items-center gap-3 p-2.5 rounded-xl border border-slate-800 bg-slate-950/60 hover:bg-slate-800/50 cursor-pointer transition select-none">
+                        <input type="checkbox" value="${topic.id}" ${isChecked ? 'checked' : ''} onchange="toggleTopic('${topic.id}')" class="w-4 h-4 accent-indigo-500 rounded cursor-pointer">
+                        <span class="text-xs font-semibold ${isChecked ? 'text-slate-200' : 'text-slate-500'}">${topic.name}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        function toggleTopic(id) {
+            if (currentSettings.selectedTopics.includes(id)) {
+                if (currentSettings.selectedTopics.length > 1) {
+                    currentSettings.selectedTopics = currentSettings.selectedTopics.filter(t => t !== id);
+                }
+            } else {
+                currentSettings.selectedTopics.push(id);
+            }
+            renderTopicsList();
+            generateWorkout();
+        }
+
+        function selectAllTopics() {
+            if (currentSettings.selectedTopics.length === ALGEBRA_TOPICS.length) {
+                currentSettings.selectedTopics = [ALGEBRA_TOPICS[0].id];
+            } else {
+                currentSettings.selectedTopics = ALGEBRA_TOPICS.map(t => t.id);
+            }
+            renderTopicsList();
+            generateWorkout();
+        }
+
+        // PREVIEW GRID RENDERER
+        function renderPreviewList() {
+            const container = document.getElementById('problems-preview-grid');
+            const countElem = document.getElementById('preview-problem-count');
+            if (countElem) countElem.innerText = generatedProblems.length;
+            if (!container) return;
+
+            container.innerHTML = generatedProblems.map((prob, idx) => `
+                <div class="bg-slate-900 border ${prob.isKept ? 'border-amber-500/50 ring-1 ring-amber-500/30' : 'border-slate-800'} rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-lg transition">
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-slate-400">#${idx + 1}</span>
+                            <span class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20 text-[10px]">${prob.topicName}</span>
+                        </div>
+                        <button onclick="toggleKeepProblem(${idx})" class="px-2 py-1 rounded-md text-[11px] font-bold flex items-center gap-1 transition ${prob.isKept ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700'}">
+                            <i data-lucide="${prob.isKept ? 'lock' : 'unlock'}" class="w-3 h-3"></i> ${prob.isKept ? 'Kept' : 'Keep'}
+                        </button>
+                    </div>
+                    <div id="preview-math-${idx}" class="text-lg text-white font-medium text-center py-2 overflow-x-auto"></div>
+                    ${prob.svg ? `<div class="flex justify-center">${prob.svg}</div>` : ''}
+                </div>
+            `).join('');
+
+            generatedProblems.forEach((prob, idx) => {
+                const elem = document.getElementById(`preview-math-${idx}`);
+                if (elem) {
+                    try { katex.render(prob.latex, elem, { throwOnError: false }); }
+                    catch(e) { elem.innerText = prob.latex; }
+                }
+            });
+
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        }
+
+        // DOWNLOAD STANDALONE LIVE WORKOUT HTML PLAYER
+        function downloadAppHtml() {
+            const standaloneContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algebra 1 Live Math Workout</title>
+    <script src="https://cdn.tailwindcss.com"><\/script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"><\/script>
+    <script src="https://unpkg.com/lucide@latest"><\/script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #020617; }
+        .font-mono-num { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between p-6 md:p-10 selection:bg-indigo-500 selection:text-white">
+
+    <!-- TOP BAR -->
+    <div class="flex items-center justify-between bg-slate-900/90 border border-slate-800 rounded-2xl px-6 py-4 shadow-2xl backdrop-blur">
+        <div class="flex items-center gap-4">
+            <span id="proj-phase-badge" class="px-4 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-black uppercase tracking-widest rounded-full">
+                WORK TIME
+            </span>
+            <span id="proj-round-indicator" class="text-lg font-bold text-slate-300 font-mono-num">
+                ROUND 1 / ${generatedProblems.length}
+            </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button id="proj-mute-btn" onclick="toggleMuteWorkout()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm rounded-xl border border-slate-700 flex items-center gap-2 transition">
+                <i data-lucide="volume-2" class="w-4 h-4 text-purple-400"></i> <span id="proj-mute-text">AUDIO ON</span>
+            </button>
+            <button id="proj-pause-btn" onclick="togglePauseWorkout()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl border border-slate-700 flex items-center gap-2 transition">
+                <i data-lucide="pause" class="w-4 h-4 fill-white"></i> PAUSE
+            </button>
+            <button onclick="skipWorkoutStep()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm rounded-xl border border-slate-700 flex items-center gap-2 transition">
+                <i data-lucide="skip-forward" class="w-4 h-4"></i> SKIP
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN DISPLAY AREA -->
+    <div class="flex-1 flex flex-col items-center justify-center my-4 overflow-hidden">
+        <div id="proj-problem-card" class="w-full max-w-4xl bg-slate-900/90 border border-slate-800 rounded-3xl p-6 md:p-8 flex flex-col items-center justify-center shadow-2xl space-y-4">
+            <div class="px-3 py-1 bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 font-bold text-xs rounded-full uppercase tracking-wider" id="proj-topic-name"></div>
+            <div id="proj-math-render" class="text-3xl md:text-5xl font-bold text-white text-center py-2 max-w-full overflow-x-auto"></div>
+            <div id="proj-svg-container" class="flex justify-center w-full max-h-[340px] hidden overflow-hidden"></div>
+        </div>
+
+        <div id="proj-rest-card" class="w-full max-w-2xl bg-slate-900/90 border border-amber-500/30 rounded-3xl p-8 flex flex-col items-center justify-center shadow-2xl text-center space-y-3 hidden">
+            <div class="w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-2">
+                <i data-lucide="coffee" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-3xl font-black text-amber-400 tracking-tight">RECOVERY INTERVAL</h3>
+            <p class="text-slate-400 text-sm font-medium">Catch your breath and prepare for the next round!</p>
+        </div>
+    </div>
+
+    <!-- BOTTOM TIMER DISPLAY -->
+    <div class="shrink-0 flex flex-col items-center justify-center bg-slate-900/80 border border-slate-800 rounded-2xl py-4 px-8 max-w-md mx-auto w-full backdrop-blur">
+        <div id="proj-status-label" class="text-xl font-black uppercase tracking-widest text-emerald-400 mb-1">
+            BEGIN
+        </div>
+        <div id="proj-timer-digits" class="text-6xl md:text-7xl font-black font-mono-num text-white tracking-tight">
+            ${currentSettings.workTime}
+        </div>
+    </div>
+
+    <!-- SOLUTION / ANSWER KEY MODAL FOR END OF SESSION -->
+    <div id="solution-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <h3 class="text-lg font-extrabold text-white flex items-center gap-2">
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400"></i> Workout Complete — Solutions & Answer Key
+                </h3>
+                <button onclick="closeSolutionModal()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="solution-modal-list" class="p-6 overflow-y-auto space-y-4 flex-1">
+                <!-- Solutions rendered here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const generatedProblems = ${JSON.stringify(generatedProblems)};
+        const currentSettings = ${JSON.stringify(currentSettings)};
+        let timerState = { round: 0, phase: 'WORK', timeLeft: currentSettings.workTime, interval: null, isPaused: false };
+        let audioCtx = null, audioInterval = null, isMuted = false, beatStep = 0;
+
+        function getAudioContext() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playSynthNote(freq, type, duration, vol=0.1) {
+            if (isMuted) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(vol, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch(e){}
+        }
+
+        function playKick() {
+            if (isMuted) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.frequency.setValueAtTime(130, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.35, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.12);
+            } catch(e){}
+        }
+
+        function playBeep(freq=800, duration=0.1, vol=0.2) { if (!isMuted) playSynthNote(freq, 'sine', duration, vol); }
+
+        function playPhaseChime(isStartWork) {
+            if (isMuted) return;
+            if (isStartWork) {
+                playSynthNote(523.25, 'triangle', 0.15, 0.25);
+                setTimeout(() => playSynthNote(659.25, 'triangle', 0.15, 0.25), 100);
+                setTimeout(() => playSynthNote(783.99, 'triangle', 0.3, 0.3), 200);
+            } else {
+                playSynthNote(783.99, 'sine', 0.15, 0.25);
+                setTimeout(() => playSynthNote(659.25, 'sine', 0.15, 0.25), 100);
+                setTimeout(() => playSynthNote(523.25, 'sine', 0.3, 0.25), 200);
+            }
+        }
+
+        function stepBeat() {
+            const track = currentSettings.musicTrack;
+            if (track === 'none' || isMuted) return;
+            beatStep = (beatStep + 1) % 16;
+            if (track === 'pop') {
+                if (beatStep % 4 === 0) playKick();
+                if (beatStep % 2 === 0) {
+                    const melody = [261.63, 329.63, 392.00, 523.25];
+                    playSynthNote(melody[(beatStep / 2) % 4], 'sine', 0.12, 0.08);
+                }
+            } else if (track === 'synthwave') {
+                if (beatStep % 4 === 0) playKick();
+                const bassNotes = [110, 110, 130.81, 146.83];
+                if (beatStep % 2 === 1) playSynthNote(bassNotes[Math.floor(beatStep / 4)], 'sawtooth', 0.1, 0.06);
+            } else if (track === 'cardio') {
+                if (beatStep % 2 === 0) playKick();
+                if (beatStep % 4 === 2) playSynthNote(880, 'square', 0.05, 0.04);
+            } else if (track === 'chiptune') {
+                if (beatStep % 4 === 0) playKick();
+                const chipArp = [523.25, 659.25, 783.99, 1046.50];
+                playSynthNote(chipArp[beatStep % 4], 'square', 0.08, 0.05);
+            } else if (track === 'groove') {
+                if (beatStep === 0 || beatStep === 6 || beatStep === 10) playKick();
+                if (beatStep % 4 === 0) playSynthNote(196.00, 'triangle', 0.2, 0.1);
+            }
+        }
+
+        function stopAudioTrack() {
+            if (audioInterval) {
+                clearInterval(audioInterval);
+                audioInterval = null;
+            }
+        }
+
+        function updateProjectionUI() {
+            const prob = generatedProblems[timerState.round];
+            if (!prob) return;
+            document.getElementById('proj-round-indicator').innerText = \`ROUND \${timerState.round + 1} / \${generatedProblems.length}\`;
+            document.getElementById('proj-timer-digits').innerText = timerState.timeLeft;
+
+            if (timerState.phase === 'WORK') {
+                document.getElementById('proj-phase-badge').innerText = 'WORK TIME';
+                document.getElementById('proj-phase-badge').className = 'px-4 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-black uppercase tracking-widest rounded-full';
+                document.getElementById('proj-status-label').innerText = 'BEGIN';
+                document.getElementById('proj-status-label').className = 'text-xl font-black uppercase tracking-widest text-emerald-400 mb-1';
+                document.getElementById('proj-problem-card').classList.remove('hidden');
+                document.getElementById('proj-rest-card').classList.add('hidden');
+
+                document.getElementById('proj-topic-name').innerText = prob.topicName;
+                const mathElem = document.getElementById('proj-math-render');
+                try { katex.render(prob.latex, mathElem, { throwOnError: false, displayMode: true }); }
+                catch(e) { mathElem.innerText = prob.latex; }
+
+                const svgContainer = document.getElementById('proj-svg-container');
+                if (prob.svg) {
+                    svgContainer.innerHTML = prob.svg;
+                    svgContainer.classList.remove('hidden');
+                } else {
+                    svgContainer.innerHTML = '';
+                    svgContainer.classList.add('hidden');
+                }
+            } else {
+                document.getElementById('proj-phase-badge').innerText = 'REST TIME';
+                document.getElementById('proj-phase-badge').className = 'px-4 py-1.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-black uppercase tracking-widest rounded-full';
+                document.getElementById('proj-status-label').innerText = 'REST';
+                document.getElementById('proj-status-label').className = 'text-xl font-black uppercase tracking-widest text-amber-400 mb-1';
+                document.getElementById('proj-problem-card').classList.add('hidden');
+                document.getElementById('proj-rest-card').classList.remove('hidden');
+            }
+        }
+
+        function openSolutionModal() {
+            stopAudioTrack();
+            const listContainer = document.getElementById('solution-modal-list');
+            if (listContainer) {
+                listContainer.innerHTML = generatedProblems.map((prob, idx) => \`
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="space-y-2 flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-400">Problem #\${idx + 1}</span>
+                                <span class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20 text-[10px]">\${prob.topicName}</span>
+                            </div>
+                            <div id="modal-prob-\${idx}" class="text-slate-200 font-medium"></div>
+                        </div>
+                        <div class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-xl px-4 py-3 min-w-[180px] text-right">
+                            <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-400/70 mb-0.5">Solution</div>
+                            <div id="modal-sol-\${idx}" class="text-lg font-bold"></div>
+                        </div>
+                    </div>
+                \`).join('');
+
+                generatedProblems.forEach((prob, idx) => {
+                    const probElem = document.getElementById(\`modal-prob-\${idx}\`);
+                    const solElem = document.getElementById(\`modal-sol-\${idx}\`);
+                    if (probElem) {
+                        try { katex.render(prob.latex, probElem, { throwOnError: false }); }
+                        catch(e) { probElem.innerText = prob.latex; }
+                    }
+                    if (solElem) {
+                        try { katex.render(prob.solution, solElem, { throwOnError: false }); }
+                        catch(e) { solElem.innerText = prob.solution; }
+                    }
+                });
+            }
+
+            const modal = document.getElementById('solution-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        }
+
+        function closeSolutionModal() {
+            const modal = document.getElementById('solution-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function tickWorkoutTimer() {
+            if (timerState.isPaused) return;
+            if (timerState.timeLeft <= 3 && timerState.timeLeft > 0) playBeep(600, 0.1, 0.15);
+            timerState.timeLeft--;
+            if (timerState.timeLeft < 0) {
+                if (timerState.phase === 'WORK') {
+                    timerState.phase = 'REST';
+                    timerState.timeLeft = currentSettings.restTime;
+                    playPhaseChime(false);
+                } else {
+                    timerState.round++;
+                    if (timerState.round >= generatedProblems.length) {
+                        clearInterval(timerState.interval);
+                        openSolutionModal();
+                        return;
+                    }
+                    timerState.phase = 'WORK';
+                    timerState.timeLeft = currentSettings.workTime;
+                    playPhaseChime(true);
+                }
+            }
+            updateProjectionUI();
+        }
+
+        function togglePauseWorkout() {
+            timerState.isPaused = !timerState.isPaused;
+            document.getElementById('proj-pause-btn').innerHTML = timerState.isPaused 
+                ? \`<i data-lucide="play" class="w-4 h-4 fill-white"></i> RESUME\`
+                : \`<i data-lucide="pause" class="w-4 h-4 fill-white"></i> PAUSE\`;
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        }
+
+        function toggleMuteWorkout() {
+            isMuted = !isMuted;
+            const btnText = document.getElementById('proj-mute-text');
+            const btn = document.getElementById('proj-mute-btn');
+            if (isMuted) {
+                btnText.innerText = 'MUTED';
+                btn.className = 'px-4 py-2 bg-rose-500/20 text-rose-300 font-bold text-sm rounded-xl border border-rose-500/40 flex items-center gap-2 transition';
+            } else {
+                btnText.innerText = 'AUDIO ON';
+                btn.className = 'px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm rounded-xl border border-slate-700 flex items-center gap-2 transition';
+            }
+        }
+
+        function skipWorkoutStep() {
+            if (timerState.phase === 'WORK') {
+                timerState.phase = 'REST';
+                timerState.timeLeft = currentSettings.restTime;
+            } else {
+                timerState.round++;
+                if (timerState.round >= generatedProblems.length) {
+                    clearInterval(timerState.interval);
+                    openSolutionModal();
+                    return;
+                }
+                timerState.phase = 'WORK';
+                timerState.timeLeft = currentSettings.workTime;
+            }
+            updateProjectionUI();
+        }
+
+        window.onload = function() {
+            updateProjectionUI();
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+            playPhaseChime(true);
+            if (currentSettings.musicTrack !== 'none') {
+                audioInterval = setInterval(stepBeat, 120);
+            }
+            timerState.interval = setInterval(tickWorkoutTimer, 1000);
+        };
+    <\/script>
+</body>
+</html>`;
+
+            const blob = new Blob([standaloneContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'algebra1_live_workout.html';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // WORKSHEET GENERATOR & PRINT LOGIC
+        let worksheetMode = 'problems'; // 'problems', 'blank', or 'answers'
+        let worksheetTitle = 'Algebra 1 Math Workout';
+
+        function updateWorksheetTitle(val) {
+            worksheetTitle = val.trim() !== '' ? val : 'Algebra 1 Math Workout';
+            renderWorksheetContent();
+        }
+
+        function openWorksheetModal() {
+            const modal = document.getElementById('worksheet-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+            renderWorksheetContent();
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        }
+
+        function closeWorksheetModal() {
+            const modal = document.getElementById('worksheet-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+
+        function printAnswerKey() {
+            closeSolutionModal();
+            setWorksheetMode('answers');
+            openWorksheetModal();
+        }
+
+        function setWorksheetMode(mode) {
+            worksheetMode = mode;
+            const btnProblems = document.getElementById('ws-tab-problems');
+            const btnBlank = document.getElementById('ws-tab-blank');
+            const btnAnswers = document.getElementById('ws-tab-answers');
+            
+            const activeStyle = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-indigo-500 text-white shadow';
+            const inactiveStyle = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700';
+
+            if (btnProblems) btnProblems.className = mode === 'problems' ? activeStyle : inactiveStyle;
+            if (btnBlank) btnBlank.className = mode === 'blank' ? activeStyle : inactiveStyle;
+            if (btnAnswers) btnAnswers.className = mode === 'answers' ? activeStyle : inactiveStyle;
+
+            renderWorksheetContent();
+        }
+
+        function renderWorksheetContent() {
+            const area = document.getElementById('printable-area');
+            if (!area) return;
+
+            const headerHtml = `
+                <div class="border-b-2 border-slate-900 pb-3 mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h1 class="text-xl font-black tracking-tight text-slate-900 uppercase">
+                            ${worksheetTitle} ${worksheetMode === 'answers' ? '<span class="text-emerald-700 font-extrabold text-base ml-2">[ANSWER KEY]</span>' : ''}
+                        </h1>
+                        <span class="text-xs font-mono font-bold border border-slate-300 px-2 py-0.5 rounded">
+                            Difficulty: ${currentSettings.difficulty.toUpperCase()} | ${generatedProblems.length} Rounds
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-xs font-semibold text-slate-700 pt-1.5 border-t border-slate-200">
+                        <div>${worksheetMode === 'answers' ? 'Teacher Copy' : 'Name: __________________________'}</div>
+                        <div>Date: _______________</div>
+                        <div>Period: ________</div>
+                    </div>
+                </div>
+            `;
+
+            if (worksheetMode === 'problems') {
+                area.innerHTML = headerHtml + `
+                    <div class="grid grid-cols-2 gap-3.5">
+                        ${generatedProblems.map((prob, idx) => `
+                            <div class="border border-slate-300 rounded-lg p-3 flex flex-col justify-between min-h-[115px] bg-slate-50/50" style="break-inside: avoid; page-break-inside: avoid;">
+                                <div>
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-xs font-black bg-slate-900 text-white px-2 py-0.5 rounded">#${idx + 1}</span>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">${prob.topicName}</span>
+                                    </div>
+                                    <div id="ws-math-${idx}" class="text-base font-semibold py-0.5"></div>
+                                    ${prob.svg ? `<div class="flex justify-center my-1 scale-90">${prob.svg}</div>` : ''}
+                                </div>
+                                <div class="mt-2 pt-1 border-t border-dashed border-slate-300 text-[10px] font-bold text-slate-400">
+                                    Work & Answer:
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                generatedProblems.forEach((prob, idx) => {
+                    const elem = document.getElementById(`ws-math-${idx}`);
+                    if (elem) {
+                        try { katex.render(prob.latex, elem, { throwOnError: false }); }
+                        catch(e) { elem.innerText = prob.latex; }
+                    }
+                });
+
+            } else if (worksheetMode === 'blank') {
+                // Blank Recording Template for Live Projection Timer
+                area.innerHTML = headerHtml + `
+                    <div class="mb-3 text-xs font-semibold text-slate-600 bg-slate-100 p-2 rounded-lg border border-slate-200">
+                        Instructions: Write down each math problem as it appears on the projection screen during the Work Interval and show your full steps below.
+                    </div>
+                    <div class="grid grid-cols-2 gap-3.5">
+                        ${generatedProblems.map((_, idx) => `
+                            <div class="border-2 border-slate-300 rounded-lg p-2.5 min-h-[115px] flex flex-col justify-between bg-white" style="break-inside: avoid; page-break-inside: avoid;">
+                                <div class="flex items-center justify-between border-b border-slate-200 pb-1 mb-1.5">
+                                    <span class="text-xs font-black bg-slate-900 text-white px-2 py-0.5 rounded">#${idx + 1}</span>
+                                    <span class="text-[10px] text-slate-400 font-mono">Problem: __________________</span>
+                                </div>
+                                <div class="text-[10px] font-bold text-slate-400 flex-1 flex items-end">
+                                    Work & Final Answer:
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (worksheetMode === 'answers') {
+                // Printable Answer Key Format
+                area.innerHTML = headerHtml + `
+                    <div class="grid grid-cols-2 gap-3.5">
+                        ${generatedProblems.map((prob, idx) => `
+                            <div class="border border-slate-300 rounded-lg p-3 flex flex-col justify-between min-h-[115px] bg-slate-50/50" style="break-inside: avoid; page-break-inside: avoid;">
+                                <div>
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-xs font-black bg-slate-900 text-white px-2 py-0.5 rounded">#${idx + 1}</span>
+                                        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">${prob.topicName}</span>
+                                    </div>
+                                    <div id="ws-math-${idx}" class="text-base font-semibold py-0.5"></div>
+                                    ${prob.svg ? `<div class="flex justify-center my-1 scale-90">${prob.svg}</div>` : ''}
+                                </div>
+                                <div class="mt-2 pt-1.5 border-t border-slate-300 flex items-center justify-between text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                                    <span>Solution:</span>
+                                    <span id="ws-sol-${idx}" class="text-sm font-extrabold"></span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+
+                generatedProblems.forEach((prob, idx) => {
+                    const mathElem = document.getElementById(`ws-math-${idx}`);
+                    const solElem = document.getElementById(`ws-sol-${idx}`);
+                    if (mathElem) {
+                        try { katex.render(prob.latex, mathElem, { throwOnError: false }); }
+                        catch(e) { mathElem.innerText = prob.latex; }
+                    }
+                    if (solElem) {
+                        try { katex.render(prob.solution, solElem, { throwOnError: false }); }
+                        catch(e) { solElem.innerText = prob.solution; }
+                    }
+                });
+            }
+        }
+
+        function printWorksheet() {
+            window.print();
+        }
+
+        // WORKOUT TIMER & PROJECTION STATE
+        let timerState = {
+            round: 0,
+            phase: 'WORK', // 'WORK' or 'REST'
+            timeLeft: 45,
+            interval: null,
+            isPaused: false
+        };
+
+        function startWorkoutProjection() {
+            if (generatedProblems.length === 0) generateWorkout();
+
+            timerState.round = 0;
+            timerState.phase = 'WORK';
+            timerState.timeLeft = currentSettings.workTime;
+            timerState.isPaused = false;
+
+            const proj = document.getElementById('projection-view');
+            proj.classList.remove('hidden');
+            proj.classList.add('flex');
+
+            updateProjectionUI();
+            startAudioTrack();
+            playPhaseChime(true);
+
+            if (timerState.interval) clearInterval(timerState.interval);
+            timerState.interval = setInterval(tickWorkoutTimer, 1000);
+        }
+
+        function tickWorkoutTimer() {
+            if (timerState.isPaused) return;
+
+            // Audio beep countdown cues for the last 3 seconds
+            if (timerState.timeLeft <= 3 && timerState.timeLeft > 0) {
+                playBeep(600, 0.1, 0.15);
+            }
+
+            timerState.timeLeft--;
+            if (timerState.timeLeft < 0) {
+                if (timerState.phase === 'WORK') {
+                    timerState.phase = 'REST';
+                    timerState.timeLeft = currentSettings.restTime;
+                    playPhaseChime(false);
+                } else {
+                    timerState.round++;
+                    if (timerState.round >= generatedProblems.length) {
+                        exitWorkoutProjection();
+                        openSolutionModal();
+                        return;
+                    }
+                    timerState.phase = 'WORK';
+                    timerState.timeLeft = currentSettings.workTime;
+                    playPhaseChime(true);
+                }
+            }
+            updateProjectionUI();
+        }
+
+        function updateProjectionUI() {
+            const prob = generatedProblems[timerState.round];
+            const mathElem = document.getElementById('proj-math-render');
+            const topicElem = document.getElementById('proj-topic-name');
+            const roundElem = document.getElementById('proj-round-indicator');
+            const phaseBadge = document.getElementById('proj-phase-badge');
+            const statusLabel = document.getElementById('proj-status-label');
+            const timerDigits = document.getElementById('proj-timer-digits');
+            const probCard = document.getElementById('proj-problem-card');
+            const restCard = document.getElementById('proj-rest-card');
+            const svgContainer = document.getElementById('proj-svg-container');
+
+            if (roundElem) roundElem.innerText = `ROUND ${timerState.round + 1} / ${generatedProblems.length}`;
+            if (timerDigits) timerDigits.innerText = timerState.timeLeft;
+
+            if (timerState.phase === 'WORK') {
+                if (phaseBadge) {
+                    phaseBadge.innerText = 'WORK TIME';
+                    phaseBadge.className = 'px-4 py-1.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-black uppercase tracking-widest rounded-full';
+                }
+                if (statusLabel) {
+                    statusLabel.innerText = 'BEGIN';
+                    statusLabel.className = 'text-xl font-black uppercase tracking-widest text-emerald-400 mb-1';
+                }
+                if (probCard) probCard.classList.remove('hidden');
+                if (restCard) restCard.classList.add('hidden');
+
+                if (topicElem) topicElem.innerText = prob.topicName;
+                if (mathElem) {
+                    try { katex.render(prob.latex, mathElem, { throwOnError: false, displayMode: true }); }
+                    catch(e) { mathElem.innerText = prob.latex; }
+                }
+                if (svgContainer) {
+                    if (prob.svg) {
+                        svgContainer.innerHTML = prob.svg;
+                        svgContainer.classList.remove('hidden');
+                    } else {
+                        svgContainer.innerHTML = '';
+                        svgContainer.classList.add('hidden');
+                    }
+                }
+            } else {
+                if (phaseBadge) {
+                    phaseBadge.innerText = 'REST TIME';
+                    phaseBadge.className = 'px-4 py-1.5 bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-black uppercase tracking-widest rounded-full';
+                }
+                if (statusLabel) {
+                    statusLabel.innerText = 'REST';
+                    statusLabel.className = 'text-xl font-black uppercase tracking-widest text-amber-400 mb-1';
+                }
+                if (probCard) probCard.classList.add('hidden');
+                if (restCard) restCard.classList.remove('hidden');
+            }
+        }
+
+        function togglePauseWorkout() {
+            timerState.isPaused = !timerState.isPaused;
+            const btn = document.getElementById('proj-pause-btn');
+            if (btn) {
+                btn.innerHTML = timerState.isPaused 
+                    ? `<i data-lucide="play" class="w-4 h-4 fill-white"></i> RESUME`
+                    : `<i data-lucide="pause" class="w-4 h-4 fill-white"></i> PAUSE`;
+            }
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        }
+
+        function updateSettings() {
+            currentSettings.workTime = parseInt(document.getElementById('work-time').value) || 45;
+            currentSettings.restTime = parseInt(document.getElementById('rest-time').value) || 15;
+            currentSettings.rounds = parseInt(document.getElementById('round-count').value) || 10;
+            currentSettings.difficulty = document.getElementById('difficulty-select').value;
+            generateWorkout();
+        }
+
+        function updateMusicSelection() {
+            currentSettings.musicTrack = document.getElementById('music-track-select').value;
+            if (isAudioPlaying) {
+                startAudioTrack();
+            }
+        }
+
+        // WEB AUDIO SYNTH ENGINE
+        let audioCtx = null;
+        let audioInterval = null;
+        let isAudioPlaying = false;
+        let isMuted = false;
+        let beatStep = 0;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSynthNote(freq, type, duration, vol=0.1) {
+            if (isMuted) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(vol, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch(e){}
+        }
+
+        function playKick() {
+            if (isMuted) return;
+            try {
+                const ctx = getAudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.frequency.setValueAtTime(130, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.35, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.12);
+            } catch(e){}
+        }
+
+        function playBeep(freq=800, duration=0.1, vol=0.2) {
+            if (isMuted) return;
+            playSynthNote(freq, 'sine', duration, vol);
+        }
+
+        function playPhaseChime(isStartWork) {
+            if (isMuted) return;
+            if (isStartWork) {
+                playSynthNote(523.25, 'triangle', 0.15, 0.25); // C5
+                setTimeout(() => playSynthNote(659.25, 'triangle', 0.15, 0.25), 100); // E5
+                setTimeout(() => playSynthNote(783.99, 'triangle', 0.3, 0.3), 200); // G5
+            } else {
+                playSynthNote(783.99, 'sine', 0.15, 0.25); // G5
+                setTimeout(() => playSynthNote(659.25, 'sine', 0.15, 0.25), 100); // E5
+                setTimeout(() => playSynthNote(523.25, 'sine', 0.3, 0.25), 200); // C5
+            }
+        }
+
+        function stepBeat() {
+            const track = currentSettings.musicTrack;
+            if (track === 'none' || isMuted) return;
+
+            beatStep = (beatStep + 1) % 16;
+
+            if (track === 'pop') {
+                if (beatStep % 4 === 0) playKick();
+                if (beatStep % 2 === 0) {
+                    const melody = [261.63, 329.63, 392.00, 523.25]; // C, E, G, C
+                    playSynthNote(melody[(beatStep / 2) % 4], 'sine', 0.12, 0.08);
+                }
+            } else if (track === 'synthwave') {
+                if (beatStep % 4 === 0) playKick();
+                const bassNotes = [110, 110, 130.81, 146.83]; // A, C, D
+                if (beatStep % 2 === 1) {
+                    playSynthNote(bassNotes[Math.floor(beatStep / 4)], 'sawtooth', 0.1, 0.06);
+                }
+            } else if (track === 'cardio') {
+                if (beatStep % 2 === 0) playKick();
+                if (beatStep % 4 === 2) {
+                    playSynthNote(880, 'square', 0.05, 0.04);
+                }
+            } else if (track === 'chiptune') {
+                if (beatStep % 4 === 0) playKick();
+                const chipArp = [523.25, 659.25, 783.99, 1046.50];
+                playSynthNote(chipArp[beatStep % 4], 'square', 0.08, 0.05);
+            } else if (track === 'groove') {
+                if (beatStep === 0 || beatStep === 6 || beatStep === 10) playKick();
+                if (beatStep % 4 === 0) {
+                    playSynthNote(196.00, 'triangle', 0.2, 0.1);
+                }
+            }
+        }
+
+        function startAudioTrack() {
+            stopAudioTrack();
+            if (currentSettings.musicTrack === 'none') return;
+            
+            getAudioContext();
+            beatStep = 0;
+            isAudioPlaying = true;
+            
+            // Default step interval (~128 BPM 16th notes)
+            const intervalMs = 120;
+            audioInterval = setInterval(stepBeat, intervalMs);
+        }
+
+        function testAudioTrack() {
+            if (isAudioPlaying) {
+                stopAudioTrack();
+            } else {
+                startAudioTrack();
+                setTimeout(() => {
+                    if (!document.getElementById('projection-view').classList.contains('flex')) {
+                        stopAudioTrack();
+                    }
+                }, 4000);
+            }
+        }
+
+        function toggleMuteWorkout() {
+            isMuted = !isMuted;
+            const btnText = document.getElementById('proj-mute-text');
+            const btn = document.getElementById('proj-mute-btn');
+            
+            if (isMuted) {
+                btnText.innerText = 'MUTED';
+                btn.className = 'px-4 py-2 bg-rose-500/20 text-rose-300 font-bold text-sm rounded-xl border border-rose-500/40 flex items-center gap-2 transition';
+                btn.querySelector('i').setAttribute('data-lucide', 'volume-x');
+            } else {
+                btnText.innerText = 'AUDIO ON';
+                btn.className = 'px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm rounded-xl border border-slate-700 flex items-center gap-2 transition';
+                btn.querySelector('i').setAttribute('data-lucide', 'volume-2');
+            }
+            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+        }
+
+        function skipWorkoutStep() {
+            if (timerState.phase === 'WORK') {
+                timerState.phase = 'REST';
+                timerState.timeLeft = currentSettings.restTime;
+            } else {
+                timerState.round++;
+                if (timerState.round >= generatedProblems.length) {
+                    exitWorkoutProjection();
+                    openSolutionModal();
+                    return;
+                }
+                timerState.phase = 'WORK';
+                timerState.timeLeft = currentSettings.workTime;
+            }
+            updateProjectionUI();
+        }
+
+        function stopAudioTrack() {
+            if (audioInterval) {
+                clearInterval(audioInterval);
+                audioInterval = null;
+            }
+            isAudioPlaying = false;
+        }
+
+        function exitWorkoutProjection() {
+            if (timerState.interval) {
+                clearInterval(timerState.interval);
+                timerState.interval = null;
+            }
+            stopAudioTrack();
+            const proj = document.getElementById('projection-view');
+            if (proj) {
+                proj.classList.add('hidden');
+                proj.classList.remove('flex');
+            }
+        }
+
+        // SOLUTION MODAL
+        function openSolutionModal() {
+            const listContainer = document.getElementById('solution-modal-list');
+            if (listContainer) {
+                listContainer.innerHTML = generatedProblems.map((prob, idx) => `
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                        <div class="space-y-2 flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold text-slate-400">Problem #${idx + 1}</span>
+                                <span class="px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 font-semibold border border-indigo-500/20 text-[10px]">${prob.topicName}</span>
+                            </div>
+                            <div id="modal-prob-${idx}" class="text-slate-200 font-medium"></div>
+                        </div>
+                        <div class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 rounded-xl px-4 py-3 min-w-[180px] text-right">
+                            <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-400/70 mb-0.5">Solution</div>
+                            <div id="modal-sol-${idx}" class="text-lg font-bold"></div>
+                        </div>
+                    </div>
+                `).join('');
+
+                generatedProblems.forEach((prob, idx) => {
+                    const probElem = document.getElementById(`modal-prob-${idx}`);
+                    const solElem = document.getElementById(`modal-sol-${idx}`);
+                    if (probElem) {
+                        try { katex.render(prob.latex, probElem, { throwOnError: false }); }
+                        catch(e) { probElem.innerText = prob.latex; }
+                    }
+                    if (solElem) {
+                        try { katex.render(prob.solution, solElem, { throwOnError: false }); }
+                        catch(e) { solElem.innerText = prob.solution; }
+                    }
+                });
+            }
+
+            const modal = document.getElementById('solution-modal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        }
+
+        function closeSolutionModal() {
+            const modal = document.getElementById('solution-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        }
+    </script>
+</body>
+</html>
