@@ -1,0 +1,2362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algebra 1 Worksheet Builder & Generator</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- KaTeX CSS & JS for Math Rendering -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+
+    /* Print Specific Styles */
+    @media print {
+      @page {
+        size: letter portrait;
+        margin: 0.3in;
+      }
+      body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      .worksheet-container {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 0.1in !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      .problem-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .page-break {
+        page-break-before: always;
+        break-before: always;
+      }
+    }
+
+    /* Standard Paper Dimensions for On-Screen Preview */
+    .paper-preview {
+      width: 100%;
+      max-width: 8.5in;
+      min-height: 11in;
+      background: #ffffff;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Upside Down Rotated Solution Key Styling */
+    .upside-down-content {
+      transform: rotate(180deg);
+      direction: ltr;
+    }
+
+    /* Custom Scrollbar */
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP BAR / HEADER -->
+  <header class="no-print bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between flex-wrap gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-600 text-white p-2 rounded-lg flex items-center justify-center">
+          <i class="fa-solid fa-square-root-variable text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight">Algebra 1 Worksheet Generator</h1>
+          <p class="text-xs text-slate-400">Big Ideas Common Core Aligned (with Grades 6–8 Prerequisites)</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-2 flex-wrap">
+        <button id="btn-generate-all" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-md shadow flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-dice"></i> Regenerate Unpinned
+        </button>
+        <button id="btn-add-custom" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-md shadow flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-plus"></i> Add Custom
+        </button>
+        <button id="btn-toggle-sidebar" class="md:hidden px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-md border border-slate-700 flex items-center gap-1.5">
+          <i class="fa-solid fa-sliders"></i> Topics & Settings
+        </button>
+        <button id="btn-print" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-md shadow-md flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-print"></i> Print / Export PDF
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN APP CONTAINER -->
+  <div class="flex-1 flex max-w-7xl w-full mx-auto p-4 gap-6 relative">
+
+    <!-- SIDEBAR: TOPICS & SETTINGS -->
+    <aside id="sidebar-panel" class="no-print w-full md:w-80 bg-white border border-slate-200 rounded-xl shadow-sm p-4 flex flex-col gap-5 shrink-0 hidden md:flex custom-scroll overflow-y-auto max-h-[calc(100vh-6rem)] sticky top-20 z-30">
+      
+      <!-- General Settings -->
+      <div class="border-b border-slate-100 pb-4">
+        <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-gear text-indigo-500"></i> Document Layout
+        </h2>
+        
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Worksheet Title</label>
+            <input type="text" id="cfg-title" value="Algebra 1 Practice & Skills Review" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none text-slate-800 font-medium">
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Fluency</label>
+              <input type="number" id="cfg-fluency-count" min="0" max="10" value="2" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-emerald-500 text-center font-bold text-emerald-700" title="Number Fluency (Integer Operations)">
+            </div>
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Prereqs</label>
+              <input type="number" id="cfg-prereq-count" min="0" max="15" value="3" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-amber-500 text-center font-bold text-amber-700" title="Prerequisite Skills (Grades 6–8)">
+            </div>
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Standard</label>
+              <input type="number" id="cfg-standard-count" min="0" max="15" value="5" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 text-center font-bold text-indigo-700" title="Algebra 1 Standard Questions">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Columns</label>
+            <select id="cfg-columns" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500">
+              <option value="1">1 Column</option>
+              <option value="2" selected>2 Columns</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Work Space Spacing</label>
+            <select id="cfg-spacing" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500">
+              <option value="compact" selected>Compact (45px - Fits 1 Page)</option>
+              <option value="medium">Medium (80px)</option>
+              <option value="spacious">Spacious (130px)</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Answer Key Format</label>
+            <select id="cfg-answer-mode" class="w-full px-2.5 py-1.5 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 font-medium text-indigo-700">
+              <option value="upside_down" selected>Upside-Down at Page Bottom</option>
+              <option value="separate">Separate Answer Key Page</option>
+              <option value="none">No Answer Key on Output</option>
+            </select>
+          </div>
+
+          <!-- Header Fields Checkboxes -->
+          <div class="pt-2 border-t border-slate-100">
+            <span class="block font-medium text-slate-700 mb-1.5">Header Student Info</span>
+            <div class="grid grid-cols-2 gap-1.5">
+              <label class="flex items-center gap-1.5 cursor-pointer text-slate-600">
+                <input type="checkbox" id="cfg-hdr-name" checked class="rounded text-indigo-600"> Name
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer text-slate-600">
+                <input type="checkbox" id="cfg-hdr-date" checked class="rounded text-indigo-600"> Date
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer text-slate-600">
+                <input type="checkbox" id="cfg-hdr-period" checked class="rounded text-indigo-600"> Period
+              </label>
+              <label class="flex items-center gap-1.5 cursor-pointer text-slate-600">
+                <input type="checkbox" id="cfg-hdr-score" checked class="rounded text-indigo-600"> Score Box
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chapter & Topic Selector Accordion -->
+      <div class="flex-1">
+        <div class="flex items-center justify-between mb-2 flex-wrap gap-1">
+          <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <i class="fa-solid fa-book-open text-indigo-500"></i> Topic Selector
+          </h2>
+          <div class="text-[11px] space-x-1">
+            <button id="btn-select-all" class="text-indigo-600 hover:underline font-semibold">All</button>
+            <span class="text-slate-300">|</span>
+            <button id="btn-clear-all" class="text-slate-500 hover:underline">Clear</button>
+            <span class="text-slate-300">|</span>
+            <button id="btn-expand-all" class="text-indigo-600 hover:underline">Expand</button>
+            <span class="text-slate-300">|</span>
+            <button id="btn-collapse-all" class="text-slate-500 hover:underline">Collapse</button>
+          </div>
+        </div>
+
+        <!-- Topic Accordions List -->
+        <div id="topic-accordions" class="space-y-2 text-xs">
+          <!-- Rendered dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- Apply Button -->
+      <button id="btn-apply-topics" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs rounded-lg shadow transition flex items-center justify-center gap-2">
+        <i class="fa-solid fa-rotate"></i> Apply & Generate Worksheet
+      </button>
+
+    </aside>
+
+    <!-- RIGHT MAIN PREVIEW AREA -->
+    <main class="flex-1 flex flex-col items-center">
+
+      <!-- Worksheet Stats & Quick Controls Bar -->
+      <div class="no-print w-full max-w-4xl bg-white border border-slate-200 rounded-lg p-3 mb-4 shadow-sm flex items-center justify-between flex-wrap gap-2 text-xs text-slate-600">
+        <div class="flex items-center gap-4">
+          <span id="stat-problem-count" class="font-semibold text-slate-800"><i class="fa-solid fa-list-ol text-indigo-500"></i> 10 Problems</span>
+          <span id="stat-pinned-count" class="text-amber-600 font-medium"><i class="fa-solid fa-thumbtack"></i> 0 Pinned</span>
+          <span class="text-slate-400">|</span>
+          <span class="text-slate-500">Target Paper: Standard Letter (8.5" x 11")</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-pin-all" class="px-2 py-1 bg-slate-100 hover:bg-amber-50 text-amber-700 border border-slate-200 rounded flex items-center gap-1 transition">
+            <i class="fa-solid fa-thumbtack"></i> Pin All
+          </button>
+          <button id="btn-unpin-all" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded flex items-center gap-1 transition">
+            <i class="fa-regular fa-circle-xmark"></i> Unpin All
+          </button>
+        </div>
+      </div>
+
+      <!-- PRINTABLE PAPER SHEET PREVIEW -->
+      <div id="worksheet-paper" class="paper-preview worksheet-container rounded-sm p-8 flex flex-col justify-between border border-slate-200 transition-all">
+        
+        <div>
+          <!-- HEADER SECTION -->
+          <div id="paper-header" class="border-b-2 border-slate-800 pb-4 mb-6">
+            <div class="flex justify-between items-start mb-3">
+              <div class="space-y-1">
+                <h2 id="out-title" class="text-2xl font-bold tracking-tight text-slate-900">Algebra 1 Practice & Skills Review</h2>
+                <p id="out-subtitle" class="text-xs text-slate-600 italic">Show all necessary work. Simplify all expressions completely.</p>
+              </div>
+
+              <!-- Score Box -->
+              <div id="out-score-box" class="border-2 border-slate-800 rounded px-3 py-1.5 text-center min-w-[90px]">
+                <span class="block text-[9px] font-bold uppercase tracking-wider text-slate-500">Score</span>
+                <span class="text-sm font-extrabold text-slate-800">____ / ____</span>
+              </div>
+            </div>
+
+            <!-- Student Metadata Row -->
+            <div class="flex justify-between items-center text-xs font-semibold text-slate-800 pt-2 border-t border-slate-200 flex-wrap gap-4">
+              <div id="out-hdr-name" class="flex-1 min-w-[200px]">Name: <span class="inline-block border-b border-slate-400 w-4/5 ml-1"></span></div>
+              <div id="out-hdr-date" class="w-36">Date: <span class="inline-block border-b border-slate-400 w-24 ml-1"></span></div>
+              <div id="out-hdr-period" class="w-28">Period: <span class="inline-block border-b border-slate-400 w-16 ml-1"></span></div>
+            </div>
+          </div>
+
+          <!-- PROBLEMS CONTAINER (WITH FLUENCY, PREREQ & TARGET PARTS) -->
+          <div id="problems-grid" class="space-y-6">
+            <!-- Dynamically populated math problems -->
+          </div>
+        </div>
+
+        <!-- FOOTER: UPSIDE DOWN ANSWER KEY -->
+        <div id="upside-down-footer" class="mt-8 pt-3 border-t-2 border-dashed border-slate-400">
+          <div class="flex items-center justify-between text-[10px] text-slate-500 font-mono mb-2 uppercase tracking-widest no-print">
+            <span>✂ Answer Key (Rotated 180° at bottom of page)</span>
+            <span>Algebra 1 Solutions</span>
+          </div>
+
+          <div class="upside-down-content p-3 bg-slate-50 rounded border border-slate-200 text-xs">
+            <div class="text-[10px] font-bold text-slate-700 uppercase tracking-wider mb-1 border-b border-slate-300 pb-1">
+              ★ Answer Key
+            </div>
+            <div id="upside-down-answers-list" class="grid grid-cols-4 gap-x-4 gap-y-1 font-mono text-[11px] text-slate-800">
+              <!-- Rendered upside down answers -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SEPARATE ANSWER KEY PAGE (Optional) -->
+      <div id="separate-answer-page" class="paper-preview worksheet-container rounded-sm p-8 mt-10 border border-slate-200 hidden page-break">
+        <div class="border-b-2 border-slate-900 pb-3 mb-6 flex justify-between items-center">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900">Answer Key & Worked Solutions</h2>
+            <p id="ans-page-subtitle" class="text-xs text-slate-600">Algebra 1 Practice Worksheet</p>
+          </div>
+          <span class="text-xs font-mono font-bold bg-slate-900 text-white px-2.5 py-1 rounded">TEACHER COPY</span>
+        </div>
+
+        <div id="separate-answers-grid" class="space-y-4 text-xs">
+          <!-- Rendered step-by-step solutions -->
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- EDIT / ADD PROBLEM MODAL (NO-PRINT) -->
+  <div id="modal-edit" class="no-print fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-lg p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <h3 id="modal-title" class="font-bold text-slate-800 text-base flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-indigo-600"></i> Edit Problem
+        </h3>
+        <button id="btn-modal-close" class="text-slate-400 hover:text-slate-600 text-lg">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Question Instructions / Prompt</label>
+          <input type="text" id="edit-prompt" class="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500" placeholder="e.g., Solve for x:">
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Math Expression (KaTeX syntax allowed, e.g. $3x - 5 = 10$)</label>
+          <textarea id="edit-math" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 font-mono" placeholder="3(x - 4) = 15"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Final Answer (for Answer Key)</label>
+          <input type="text" id="edit-answer" class="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 font-mono" placeholder="x = 9">
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Worked Solution Steps (Optional)</label>
+          <textarea id="edit-steps" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded focus:ring-2 focus:ring-indigo-500 font-mono" placeholder="3x - 12 = 15 => 3x = 27 => x = 9"></textarea>
+        </div>
+
+        <div class="flex items-center gap-2 pt-1">
+          <input type="checkbox" id="edit-grid" class="rounded text-indigo-600">
+          <label for="edit-grid" class="font-medium text-slate-700">Include Coordinate Grid Diagram</label>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-2 border-t border-slate-100 pt-3">
+        <button id="btn-modal-cancel" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-lg">Cancel</button>
+        <button id="btn-modal-save" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-lg shadow">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="no-print fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    /* ==========================================================================
+       CURRICULUM CHAPTERS & TOPICS DEFINITION WITH PREREQUISITES (Grades 6-8)
+       ========================================================================== */
+    const CHAPTER_DATA = [
+      {
+        id: 1,
+        title: "Ch 1: Solving Linear Equations",
+        topics: [
+          { 
+            id: "c1_multistep", 
+            name: "Multi-Step Linear Equations",
+            prereqs: [
+              { id: "c1_p6", grade: 6, name: "Gr 6: Order of Operations & 1-Step Equations" },
+              { id: "c1_p7", grade: 7, name: "Gr 7: Combining Like Terms & Integers" },
+              { id: "c1_p8", grade: 8, name: "Gr 8: Two-Step Equations (ax + b = c)" }
+            ]
+          },
+          { 
+            id: "c1_bothsides", 
+            name: "Variables on Both Sides",
+            prereqs: [
+              { id: "c1_p7_dist", grade: 7, name: "Gr 7: Distributive Property a(b + c)" }
+            ]
+          },
+          { 
+            id: "c1_absval", 
+            name: "Absolute Value Equations",
+            prereqs: [
+              { id: "c1_p6_abs", grade: 6, name: "Gr 6: Absolute Value |x| Concept" }
+            ]
+          },
+          { 
+            id: "c1_literal", 
+            name: "Literal Equations & Formulas",
+            prereqs: [
+              { id: "c1_p6_eval", grade: 6, name: "Gr 6: Evaluating Multi-Variable Expressions" }
+            ]
+          }
+        ]
+      },
+      {
+        id: 2,
+        title: "Ch 2: Solving Linear Inequalities",
+        topics: [
+          { 
+            id: "c2_multistep", 
+            name: "Multi-Step Inequalities",
+            prereqs: [
+              { id: "c2_p6", grade: 6, name: "Gr 6: Inequality Symbols & Number Line Plots" },
+              { id: "c2_p7", grade: 7, name: "Gr 7: Flipping Inequality Symbol on Negatives" },
+              { id: "c2_p8", grade: 8, name: "Gr 8: Two-Step Inequalities" }
+            ]
+          },
+          { id: "c2_compound", name: "Compound Inequalities (AND/OR)", prereqs: [] },
+          { id: "c2_absineq", name: "Absolute Value Inequalities", prereqs: [] }
+        ]
+      },
+      {
+        id: 3,
+        title: "Ch 3: Graphing Linear Functions",
+        topics: [
+          { 
+            id: "c3_graph", 
+            name: "Graphing Linear Functions (Grid)",
+            prereqs: [
+              { id: "c3_p6", grade: 6, name: "Gr 6: Plotting Points in 4 Quadrants" },
+              { id: "c3_p7", grade: 7, name: "Gr 7: Constant of Proportionality (y = kx)" },
+              { id: "c3_p8", grade: 8, name: "Gr 8: Finding Slope m = Δy/Δx" }
+            ]
+          },
+          { id: "c3_eval", name: "Evaluating Function Notation f(x)", prereqs: [] },
+          { id: "c3_intercepts", name: "Finding X and Y Intercepts", prereqs: [] }
+        ]
+      },
+      {
+        id: 4,
+        title: "Ch 4: Writing Linear Functions",
+        topics: [
+          { 
+            id: "c4_twopoints", 
+            name: "Writing Line Given 2 Points",
+            prereqs: [
+              { id: "c4_p8", grade: 8, name: "Gr 8: Writing y = mx + b from Table/Graph" }
+            ]
+          },
+          { id: "c4_parallel", name: "Parallel & Perpendicular Lines", prereqs: [] },
+          { id: "c4_seq", name: "Arithmetic Sequences", prereqs: [] }
+        ]
+      },
+      {
+        id: 5,
+        title: "Ch 5: Systems of Linear Equations",
+        topics: [
+          { 
+            id: "c5_sub", 
+            name: "Systems by Substitution",
+            prereqs: [
+              { id: "c5_p8", grade: 8, name: "Gr 8: Finding Point of Intersection" }
+            ]
+          },
+          { id: "c5_elim", name: "Systems by Elimination", prereqs: [] },
+          { id: "c5_word", name: "Systems Real-World Word Problems", prereqs: [] }
+        ]
+      },
+      {
+        id: 6,
+        title: "Ch 6: Exponential Functions & Sequences",
+        topics: [
+          { 
+            id: "c6_laws", 
+            name: "Properties of Exponents",
+            prereqs: [
+              { id: "c6_p6", grade: 6, name: "Gr 6: Exponents as Repeated Multiplication" },
+              { id: "c6_p8", grade: 8, name: "Gr 8: Product & Quotient Exponent Rules" }
+            ]
+          },
+          { id: "c6_rational_exp", name: "Rational Exponents & Radicals", prereqs: [] },
+          { id: "c6_growth", name: "Exponential Growth & Decay", prereqs: [] },
+          { id: "c6_like_bases", name: "Solving Exponential Equations (Like Bases)", prereqs: [] }
+        ]
+      },
+      {
+        id: 7,
+        title: "Ch 7: Polynomials & Factoring",
+        topics: [
+          { 
+            id: "c7_poly_ops", 
+            name: "Adding & Multiplying Polynomials (FOIL)", 
+            prereqs: [
+              { id: "c7_p8", grade: 8, name: "Gr 8: Monomial Multiplication" }
+            ] 
+          },
+          { 
+            id: "c7_factor_gcf", 
+            name: "Factoring GCF", 
+            prereqs: [
+              { id: "c7_p6", grade: 6, name: "Gr 6: Greatest Common Factor (GCF)" },
+              { id: "c7_p7", grade: 7, name: "Gr 7: Factoring Linear Expressions" }
+            ] 
+          },
+          { id: "c7_factor_quad", name: "Factoring Trinomials (a=1 & a>1)", prereqs: [] },
+          { id: "c7_solve_zero", name: "Zero-Product Property", prereqs: [] }
+        ]
+      },
+      {
+        id: 8,
+        title: "Ch 8: Graphing Quadratic Functions",
+        topics: [
+          { 
+            id: "c8_vertex", 
+            name: "Finding Vertex & Axis of Symmetry",
+            prereqs: [
+              { id: "c8_p6", grade: 6, name: "Gr 6: Evaluating Squared Variable Terms" }
+            ]
+          },
+          { id: "c8_transform", name: "Transformations of Quadratics", prereqs: [] },
+          { id: "c8_graph", name: "Graphing Quadratic Functions (Grid)", prereqs: [] }
+        ]
+      },
+      {
+        id: 9,
+        title: "Ch 9: Solving Quadratic Equations",
+        topics: [
+          { 
+            id: "c9_sqroot", 
+            name: "Solving by Taking Square Roots",
+            prereqs: [
+              { id: "c9_p6", grade: 6, name: "Gr 6: Perfect Squares & Roots" },
+              { id: "c9_p8", grade: 8, name: "Gr 8: Estimating Non-Perfect Roots" }
+            ]
+          },
+          { id: "c9_quadformula", name: "Solving by Quadratic Formula", prereqs: [] },
+          { id: "c9_simp_rad", name: "Simplifying Radical Expressions", prereqs: [] }
+        ]
+      },
+      {
+        id: 10,
+        title: "Ch 10: Radical Functions & Equations",
+        topics: [
+          { 
+            id: "c10_solve_rad", 
+            name: "Solving Radical Equations",
+            prereqs: [
+              { id: "c10_p8", grade: 8, name: "Gr 8: Cube & Square Roots Evaluation" }
+            ]
+          },
+          { id: "c10_domain_rad", name: "Domain of Radical Functions", prereqs: [] },
+          { id: "c10_ops_rad", name: "Radical Operations", prereqs: [] }
+        ]
+      },
+      {
+        id: 11,
+        title: "Ch 11: Data Analysis & Displays",
+        topics: [
+          { 
+            id: "c11_stats", 
+            name: "Mean, Median, Mode & Range",
+            prereqs: [
+              { id: "c11_p6", grade: 6, name: "Gr 6: Calculating Central Tendency" }
+            ]
+          },
+          { id: "c11_five_num", name: "Five-Number Summary & Box Plots", prereqs: [] }
+        ]
+      }
+    ];
+
+    /* FAST METADATA MAP FOR TOPIC TYPES */
+    const TOPIC_META = {};
+    CHAPTER_DATA.forEach(ch => {
+      ch.topics.forEach(t => {
+        TOPIC_META[t.id] = { isPrereq: false, gradeTag: 'Algebra 1', name: t.name };
+        if (t.prereqs) {
+          t.prereqs.forEach(p => {
+            TOPIC_META[p.id] = { isPrereq: true, gradeTag: `Gr ${p.grade}`, name: p.name };
+          });
+        }
+      });
+    });
+
+    /* ==========================================================================
+       APPLICATION STATE
+       ========================================================================== */
+    let appState = {
+      title: "Algebra 1 Practice & Skills Review",
+      numFluency: 2,
+      numPrereqs: 3,
+      numStandards: 5,
+      columns: 2,
+      spacing: "compact",
+      answerMode: "upside_down", // 'upside_down', 'separate', 'none'
+      headerFields: {
+        name: true,
+        date: true,
+        period: true,
+        score: true
+      },
+      selectedTopics: [], // Selected target & prereq IDs
+      problems: [], 
+      editingProblemId: null
+    };
+
+    /* ==========================================================================
+       UTILITY HELPERS
+       ========================================================================== */
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function randChoice(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function gcd(a, b) {
+      a = Math.abs(a); b = Math.abs(b);
+      while (b) { let t = b; b = a % b; a = t; }
+      return a;
+    }
+
+    function formatFraction(num, den) {
+      if (den === 0) return "undefined";
+      if (num === 0) return "0";
+      let sign = (num < 0) ^ (den < 0) ? "-" : "";
+      num = Math.abs(num); den = Math.abs(den);
+      let g = gcd(num, den);
+      num /= g; den /= g;
+      if (den === 1) return `${sign}${num}`;
+      return `${sign}\\frac{${num}}{${den}}`;
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `px-4 py-2.5 rounded-lg shadow-lg text-xs font-semibold text-white flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto ${
+        type === 'success' ? 'bg-emerald-600' : type === 'warning' ? 'bg-amber-600' : 'bg-slate-800'
+      }`;
+      toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i> ${message}`;
+      container.appendChild(toast);
+      
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 2500);
+    }
+
+    /* Helper to render KaTeX math safely inside standard text strings */
+    function renderMathText(text) {
+      if (!text) return '';
+      try {
+        return text.replace(/\$\$(.*?)\$\$/g, (m, math) => {
+          try { return katex.renderToString(math, { displayMode: true, throwOnError: false }); } 
+          catch (e) { return math; }
+        }).replace(/\$(.*?)\$/g, (m, math) => {
+          try { return katex.renderToString(math, { displayMode: false, throwOnError: false }); } 
+          catch (e) { return math; }
+        });
+      } catch (err) {
+        return text;
+      }
+    }
+
+    /* SVG Coordinate Grid Generator */
+    function generateSVGGrid(m = 1, b = 0, isQuad = false, qA = 1, qH = 0, qK = 0, showSolution = false) {
+      const size = 120;
+      const range = 6;
+      const step = size / (2 * range);
+      const origin = size / 2;
+
+      let gridLines = '';
+      for (let i = -range; i <= range; i++) {
+        if (i === 0) continue;
+        let pos = origin + i * step;
+        gridLines += `<line x1="${pos}" y1="0" x2="${pos}" y2="${size}" stroke="#e2e8f0" stroke-width="1"/>`;
+        gridLines += `<line x1="0" y1="${pos}" x2="${size}" y2="${pos}" stroke="#e2e8f0" stroke-width="1"/>`;
+      }
+
+      let pathData = '';
+      if (showSolution) {
+        if (!isQuad) {
+          let x1 = -range, y1 = m * x1 + b;
+          let x2 = range, y2 = m * x2 + b;
+          let px1 = origin + x1 * step, py1 = origin - y1 * step;
+          let px2 = origin + x2 * step, py2 = origin - y2 * step;
+          pathData = `M ${px1} ${py1} L ${px2} ${py2}`;
+        } else {
+          let points = [];
+          for (let x = -range; x <= range; x += 0.2) {
+            let y = qA * Math.pow(x - qH, 2) + qK;
+            let px = origin + x * step;
+            let py = origin - y * step;
+            if (py >= -10 && py <= size + 10) {
+              points.push(`${px},${py}`);
+            }
+          }
+          if (points.length > 1) {
+            pathData = `M ${points.join(' L ')}`;
+          }
+        }
+      }
+
+      return `
+        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" class="border border-slate-300 rounded bg-white my-1">
+          ${gridLines}
+          <line x1="${origin}" y1="0" x2="${origin}" y2="${size}" stroke="#475569" stroke-width="1.5"/>
+          <line x1="0" y1="${origin}" x2="${size}" y2="${origin}" stroke="#475569" stroke-width="1.5"/>
+          <text x="${size-10}" y="${origin-4}" font-size="8" fill="#64748b" font-weight="bold">x</text>
+          <text x="${origin+4}" y="10" font-size="8" fill="#64748b" font-weight="bold">y</text>
+          ${pathData ? `<path d="${pathData}" fill="none" stroke="#2563eb" stroke-width="2" stroke-dasharray="3,3"/>` : ''}
+        </svg>
+      `;
+    }
+
+    /* SVG Number Line Generator for Inequalities */
+    function generateSVGNumberLine(val, op, isCompound = false, val2 = null, op2 = null, showSolution = false) {
+      const width = 240;
+      const height = 36;
+      const yLine = 18;
+
+      let minVal, maxVal;
+      if (!isCompound) {
+        minVal = val - 4;
+        maxVal = val + 4;
+      } else {
+        minVal = Math.min(val, val2) - 2;
+        maxVal = Math.max(val, val2) + 2;
+      }
+
+      const totalUnits = maxVal - minVal;
+      const step = (width - 30) / totalUnits;
+      const xStart = 15;
+
+      const getX = (v) => xStart + (v - minVal) * step;
+
+      // Axis Ticks and Labels
+      let ticksHtml = '';
+      for (let v = minVal; v <= maxVal; v++) {
+        let px = getX(v);
+        ticksHtml += `<line x1="${px}" y1="${yLine - 3}" x2="${px}" y2="${yLine + 3}" stroke="#475569" stroke-width="1.2"/>`;
+        ticksHtml += `<text x="${px}" y="${yLine + 12}" font-size="8" font-weight="600" fill="#334155" text-anchor="middle">${v}</text>`;
+      }
+
+      let plotHtml = '';
+
+      // Only plot the ray/circle solution if showSolution is explicitly true
+      if (showSolution) {
+        let normOp = (op || '').replace('\\ge', '>=').replace('\\le', '<=');
+
+        if (!isCompound) {
+          let px = getX(val);
+          let isClosed = normOp.includes('=');
+          let isRight = normOp.includes('>');
+
+          let rayEndX = isRight ? width - 5 : 5;
+          let lineStartX = isRight ? px + (isClosed ? 0 : 4) : px - (isClosed ? 0 : 4);
+
+          plotHtml += `<line x1="${lineStartX}" y1="${yLine}" x2="${rayEndX}" y2="${yLine}" stroke="#2563eb" stroke-width="3"/>`;
+          plotHtml += `<polygon points="${isRight ? `${width-2},${yLine} ${width-8},${yLine-4} ${width-8},${yLine+4}` : `2,${yLine} 8,${yLine-4} 8,${yLine+4}`}" fill="#2563eb"/>`;
+          plotHtml += `<circle cx="${px}" cy="${yLine}" r="4" fill="${isClosed ? '#2563eb' : '#ffffff'}" stroke="#2563eb" stroke-width="2"/>`;
+        } else {
+          let px1 = getX(val);
+          let px2 = getX(val2);
+          let normOp2 = (op2 || '').replace('\\ge', '>=').replace('\\le', '<=');
+          let isClosed1 = normOp.includes('=');
+          let isClosed2 = normOp2.includes('=');
+
+          plotHtml += `<line x1="${px1}" y1="${yLine}" x2="${px2}" y2="${yLine}" stroke="#2563eb" stroke-width="3"/>`;
+          plotHtml += `<circle cx="${px1}" cy="${yLine}" r="4" fill="${isClosed1 ? '#2563eb' : '#ffffff'}" stroke="#2563eb" stroke-width="2"/>`;
+          plotHtml += `<circle cx="${px2}" cy="${yLine}" r="4" fill="${isClosed2 ? '#2563eb' : '#ffffff'}" stroke="#2563eb" stroke-width="2"/>`;
+        }
+      }
+
+      return `
+        <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" class="border border-slate-200 rounded bg-white my-1">
+          <line x1="5" y1="${yLine}" x2="${width - 5}" y2="${yLine}" stroke="#475569" stroke-width="1.5"/>
+          <polygon points="2,${yLine} 8,${yLine-3} 8,${yLine+3}" fill="#475569"/>
+          <polygon points="${width-2},${yLine} ${width-8},${yLine-3} ${width-8},${yLine+3}" fill="#475569"/>
+          ${ticksHtml}
+          ${plotHtml}
+        </svg>
+      `;
+    }
+
+    /* ==========================================================================
+       COMPLETE DYNAMIC MATH PROBLEM GENERATORS
+       ========================================================================== */
+    const PROBLEM_GENERATORS = {
+
+      /* --- NUMBER FLUENCY GENERATORS (INTEGER OPERATIONS) --- */
+      nf_int_add: () => {
+        let a = randInt(-25, 25); if (a === 0) a = -12;
+        let b = randInt(-25, 25); if (b === 0) b = 15;
+        let ans = a + b;
+        let bStr = b < 0 ? `(${b})` : `${b}`;
+        return {
+          sectionType: 'fluency', isPrereq: true, gradeTag: 'Fluency', topicId: 'nf_int_add',
+          prompt: 'Evaluate the integer addition:',
+          questionMath: `$$${a} + ${bStr}$$`,
+          answerMath: `${ans}`,
+          steps: `${a} + ${bStr} = ${ans}`
+        };
+      },
+
+      nf_int_sub: () => {
+        let a = randInt(-20, 20); if (a === 0) a = -8;
+        let b = randInt(-20, 20); if (b === 0) b = -14;
+        let ans = a - b;
+        let bStr = b < 0 ? `(${b})` : `${b}`;
+        return {
+          sectionType: 'fluency', isPrereq: true, gradeTag: 'Fluency', topicId: 'nf_int_sub',
+          prompt: 'Evaluate the integer subtraction:',
+          questionMath: `$$${a} - ${bStr}$$`,
+          answerMath: `${ans}`,
+          steps: `${a} - ${bStr} = ${ans}`
+        };
+      },
+
+      nf_int_mult: () => {
+        let a = randChoice([-12, -9, -8, -7, -6, -5, 6, 7, 8, 9, 12]);
+        let b = randChoice([-12, -9, -8, -7, -6, -4, 4, 6, 7, 8, 9]);
+        let ans = a * b;
+        let bStr = b < 0 ? `(${b})` : `${b}`;
+        return {
+          sectionType: 'fluency', isPrereq: true, gradeTag: 'Fluency', topicId: 'nf_int_mult',
+          prompt: 'Multiply the integers:',
+          questionMath: `$$${a} \\cdot ${bStr}$$`,
+          answerMath: `${ans}`,
+          steps: `${a} \\cdot ${bStr} = ${ans}`
+        };
+      },
+
+      nf_int_div: () => {
+        let b = randChoice([-9, -8, -7, -6, -5, -4, -3, 3, 4, 5, 6, 7, 8, 9]);
+        let ans = randChoice([-9, -8, -7, -6, -5, -4, 4, 5, 6, 7, 8, 9]);
+        let a = b * ans;
+        return {
+          sectionType: 'fluency', isPrereq: true, gradeTag: 'Fluency', topicId: 'nf_int_div',
+          prompt: 'Divide the integers:',
+          questionMath: `$$${a} \\div (${b})$$`,
+          answerMath: `${ans}`,
+          steps: `${a} \\div (${b}) = ${ans}`
+        };
+      },
+
+      nf_int_mixed: () => {
+        let a = randInt(-15, 15); if (a === 0) a = -6;
+        let b = randChoice([-5, -4, -3, 3, 4, 5]);
+        let c = randChoice([-6, -4, -2, 2, 4, 6]);
+        let ans = a + b * c;
+        let bStr = b < 0 ? `(${b})` : `${b}`;
+        let cStr = c < 0 ? `(${c})` : `${c}`;
+        return {
+          sectionType: 'fluency', isPrereq: true, gradeTag: 'Fluency', topicId: 'nf_int_mixed',
+          prompt: 'Evaluate the multi-term integer expression:',
+          questionMath: `$$${a} + ${bStr} \\cdot ${cStr}$$`,
+          answerMath: `${ans}`,
+          steps: `${a} + ${b * c} = ${ans}`
+        };
+      },
+
+      /* --- GRADE 6-8 PREREQUISITE GENERATORS --- */
+      c1_p6: () => {
+        let a = randInt(2, 5);
+        let b = randInt(2, 6);
+        let c = randInt(2, 7);
+        let d = randChoice([2, 4, 6]);
+        let e = randChoice([2, 4]);
+        let dSq = d * d;
+        let div = dSq / e;
+        let sumInside = b + c;
+        let prod = a * sumInside;
+        let ans = prod - div;
+        return {
+          isPrereq: true, grade: 6, gradeTag: 'Grade 6 Prereq', topicId: 'c1_p6',
+          prompt: 'Evaluate using order of operations (PEMDAS):',
+          questionMath: `$$${a} \\cdot (${b} + ${c}) - ${d}^2 \\div ${e}$$`,
+          answerMath: `${ans}`,
+          steps: `${a} \\cdot ${sumInside} - ${dSq} \\div ${e} = ${prod} - ${div} = ${ans}`
+        };
+      },
+
+      c1_p7: () => {
+        let a = randInt(3, 8), b = randInt(3, 9), c = randInt(1, 5), d = randInt(2, 9);
+        return {
+          isPrereq: true, grade: 7, gradeTag: 'Grade 7 Prereq', topicId: 'c1_p7',
+          prompt: 'Simplify the expression by combining like terms:',
+          questionMath: `$$${a}x + ${b} - ${c}x + ${d}$$`,
+          answerMath: `${a - c}x + ${b + d}`,
+          steps: `(${a} - ${c})x + (${b} + ${d}) = ${a-c}x + ${b+d}`
+        };
+      },
+
+      c1_p8: () => {
+        let x = randInt(2, 9), a = randInt(2, 6), b = randInt(1, 12);
+        let rhs = a * x + b;
+        return {
+          isPrereq: true, grade: 8, gradeTag: 'Grade 8 Prereq', topicId: 'c1_p8',
+          prompt: 'Solve the two-step linear equation:',
+          questionMath: `$$${a}x + ${b} = ${rhs}$$`,
+          answerMath: `x = ${x}`,
+          steps: `${a}x = ${rhs - b} \\implies x = ${x}`
+        };
+      },
+
+      c1_p7_dist: () => {
+        let a = randInt(2, 6), b = randInt(2, 5), c = randInt(1, 9);
+        return {
+          isPrereq: true, grade: 7, gradeTag: 'Grade 7 Prereq', topicId: 'c1_p7_dist',
+          prompt: 'Expand using the Distributive Property:',
+          questionMath: `$$${a}(${b}x + ${c})$$`,
+          answerMath: `${a*b}x + ${a*c}`,
+          steps: `${a} \\cdot ${b}x + ${a} \\cdot ${c} = ${a*b}x + ${a*c}`
+        };
+      },
+
+      c1_p6_abs: () => {
+        let val = randInt(-20, -3);
+        let add = randInt(2, 12);
+        return {
+          isPrereq: true, grade: 6, gradeTag: 'Grade 6 Prereq', topicId: 'c1_p6_abs',
+          prompt: 'Evaluate the absolute value expression:',
+          questionMath: `$$|${val}| + ${add}$$`,
+          answerMath: `${Math.abs(val) + add}`,
+          steps: `${Math.abs(val)} + ${add} = ${Math.abs(val) + add}`
+        };
+      },
+
+      c1_p6_eval: () => {
+        let x = randInt(2, 6), y = randInt(2, 6);
+        let a = randInt(2, 5), b = randInt(2, 5), c = randInt(1, 9);
+        let ans = a * x + b * y - c;
+        return {
+          isPrereq: true, grade: 6, gradeTag: 'Grade 6 Prereq', topicId: 'c1_p6_eval',
+          prompt: `Evaluate the expression for $x = ${x}$ and $y = ${y}$:`,
+          questionMath: `$$${a}x + ${b}y - ${c}$$`,
+          answerMath: `${ans}`,
+          steps: `${a}(${x}) + ${b}(${y}) - ${c} = ${a*x} + ${b*y} - ${c} = ${ans}`
+        };
+      },
+
+      c2_p6: () => {
+        let val = randInt(1, 8);
+        let add = randInt(2, 6);
+        let op = randChoice(['>', '<', '>=', '<=']);
+        return {
+          isPrereq: true, grade: 6, gradeTag: 'Grade 6 Prereq', topicId: 'c2_p6',
+          prompt: 'Solve the one-step inequality and sketch the solution on the number line:',
+          questionMath: `$$x + ${add} ${op.replace('>=','\\ge').replace('<=','\\le')} ${val + add}$$`,
+          answerMath: `x ${op.replace('>=','\\ge').replace('<=','\\le')} ${val}`,
+          steps: `Subtract ${add} from both sides: x ${op.replace('>=','\\ge').replace('<=','\\le')} ${val}`,
+          hasNumberLine: true,
+          numberLineData: { val: val, op: op }
+        };
+      },
+
+      c2_p7: () => {
+        let x = randInt(2, 7);
+        let coeff = randChoice([-2, -3, -4]);
+        let rhs = coeff * x;
+        let op = randChoice(['<=', '>=', '<', '>']);
+        let flippedOp = op === '<=' ? '>=' : op === '>=' ? '<=' : op === '<' ? '>' : '<';
+        return {
+          isPrereq: true, grade: 7, gradeTag: 'Grade 7 Prereq', topicId: 'c2_p7',
+          prompt: 'Solve the inequality (flip symbol on negative divide) and graph:',
+          questionMath: `$$${coeff}x ${op.replace('>=','\\ge').replace('<=','\\le')} ${rhs}$$`,
+          answerMath: `x ${flippedOp.replace('>=','\\ge').replace('<=','\\le')} ${x}`,
+          steps: `Divide by ${coeff} and flip symbol: x ${flippedOp.replace('>=','\\ge').replace('<=','\\le')} ${x}`,
+          hasNumberLine: true,
+          numberLineData: { val: x, op: flippedOp }
+        };
+      },
+
+      c2_p8: () => {
+        let x = randInt(1, 6);
+        let a = randInt(2, 4);
+        let b = randInt(2, 6);
+        let rhs = a * x - b;
+        let op = randChoice(['<', '>', '<=']);
+        return {
+          isPrereq: true, grade: 8, gradeTag: 'Grade 8 Prereq', topicId: 'c2_p8',
+          prompt: 'Solve the two-step inequality and graph the solution:',
+          questionMath: `$$${a}x - ${b} ${op.replace('<=','\\le')} ${rhs}$$`,
+          answerMath: `x ${op.replace('<=','\\le')} ${x}`,
+          steps: `${a}x ${op.replace('<=','\\le')} ${rhs + b} \\implies x ${op.replace('<=','\\le')} ${x}`,
+          hasNumberLine: true,
+          numberLineData: { val: x, op: op }
+        };
+      },
+
+      c3_p6: () => {
+        let px = randInt(-8, 8); if (px === 0) px = 3;
+        let py = randInt(-8, 8); if (py === 0) py = -4;
+        let quad = px > 0 && py > 0 ? 'I' : px < 0 && py > 0 ? 'II' : px < 0 && py < 0 ? 'III' : 'IV';
+        return {
+          isPrereq: true, grade: 6, gradeTag: 'Grade 6 Prereq', topicId: 'c3_p6',
+          prompt: `Identify the coordinate quadrant for the ordered pair $(${px}, ${py})$:`,
+          questionMath: ``,
+          answerMath: `\\text{Quadrant } ${quad}`,
+          steps: `x ${px > 0 ? '> 0' : '< 0'} \\text{ and } y ${py > 0 ? '> 0' : '< 0'} \\implies \\text{Quadrant } ${quad}`
+        };
+      },
+
+      c3_p7: () => {
+        let k = randInt(3, 9);
+        return {
+          isPrereq: true, grade: 7, gradeTag: 'Grade 7 Prereq', topicId: 'c3_p7',
+          prompt: 'Find the constant of proportionality ($k = \\frac{y}{x}$):',
+          questionMath: `$$y = ${k}x$$`,
+          answerMath: `k = ${k}`,
+          steps: `Unit rate k = ${k}`
+        };
+      },
+
+      c3_p8: () => {
+        let m = randChoice([-3, -2, -1, 1, 2, 3, 4]);
+        let x1 = randInt(-4, 2);
+        let dx = randInt(1, 4);
+        let x2 = x1 + dx;
+        let y1 = randInt(-4, 4);
+        let y2 = y1 + m * dx;
+        return {
+          isPrereq: true, grade: 8, gradeTag: 'Grade 8 Prereq', topicId: 'c3_p8',
+          prompt: `Find the slope ($m$) of the line passing through $(${x1}, ${y1})$ and $(${x2}, ${y2})$:`,
+          questionMath: ``,
+          answerMath: `m = ${m}`,
+          steps: `m = \\frac{${y2} - (${y1})}{${x2} - (${x1})} = \\frac{${y2 - y1}}{${dx}} = ${m}`
+        };
+      },
+
+      c4_p8: () => {
+        let m = randChoice([-4, -3, -2, 2, 3, 4, 5]);
+        let b = randInt(-8, 8); if (b === 0) b = 3;
+        let bStr = b > 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+        return {
+          isPrereq: true, grade: 8, gradeTag: 'Grade 8 Prereq', topicId: 'c4_p8',
+          prompt: `Write the slope-intercept equation of a line with slope $m = ${m}$ and y-intercept $(0, ${b})$:`,
+          questionMath: ``,
+          answerMath: `y = ${m}x ${bStr}`,
+          steps: `y = mx + b \\implies y = ${m}x ${bStr}`
+        };
+      },
+
+      c5_p8: () => {
+        let x = randInt(1, 5), m = randInt(2, 4), b = randInt(1, 5);
+        let isSol = Math.random() < 0.5;
+        let y = isSol ? (m * x + b) : (m * x + b + randChoice([-2, -1, 1, 2]));
+        return {
+          isPrereq: true, grade: 8, gradeTag: 'Grade 8 Prereq', topicId: 'c5_p8',
+          prompt: `Check if the ordered pair $(${x}, ${y})$ is a solution to the equation $y = ${m}x + ${b}$:`,
+          questionMath: ``,
+          answerMath: isSol ? `\\text{Yes, } ${y} = ${m}(${x}) + ${b}` : `\\text{No, } ${y} \\neq ${m}(${x}) + ${b}`,
+          steps: `Substitute: ${m}(${x}) + ${b} = ${m*x + b}. ${isSol ? `${y} = ${m*x + b} \\text{ (True)}` : `${y} \\neq ${m*x + b} \\text{ (False)}`}`
+        };
+      },
+
+      c6_p6: () => {
+        let base = randChoice([2, 3, 4, 5, 6]);
+        let exp = base > 4 ? randChoice([2, 3]) : randChoice([3, 4]);
+        let ans = Math.pow(base, exp);
+        return {
+          isPrereq: true, grade: 6, gradeTag: 'Grade 6 Prereq', topicId: 'c6_p6',
+          prompt: 'Evaluate the exponential expression:',
+          questionMath: `$$${base}^${exp}$$`,
+          answerMath: `${ans}`,
+          steps: `${Array(exp).fill(base).join(' \\cdot ')} = ${ans}`
+        };
+      },
+
+      c6_p8: () => {
+        let e1 = randInt(2, 6), e2 = randInt(2, 6);
+        return {
+          isPrereq: true, grade: 8, gradeTag: 'Grade 8 Prereq', topicId: 'c6_p8',
+          prompt: 'Simplify using the Product Rule ($x^a \\cdot x^b = x^{a+b}$):',
+          questionMath: `$$x^{${e1}} \\cdot x^{${e2}}$$`,
+          answerMath: `x^{${e1 + e2}}`,
+          steps: `${e1} + ${e2} = ${e1 + e2} \\implies x^{${e1 + e2}}`
+        };
+      },
+
+      c7_p6: () => {
+        let gcfVal = randChoice([4, 6, 8, 9, 12, 15]);
+        let m1 = randChoice([2, 3, 5]), m2 = randChoice([3, 4, 7]);
+        while (gcd(m1, m2) > 1) { m2 = randInt(2, 9); }
+        let num1 = gcfVal * m1, num2 = gcfVal * m2;
+        return {
+          isPrereq: true, grade: 6, gradeTag: 'Grade 6 Prereq', topicId: 'c7_p6',
+          prompt: `Find the Greatest Common Factor (GCF) of ${num1} and ${num2}:`,
+          questionMath: ``,
+          answerMath: `${gcfVal}`,
+          steps: `GCF(${num1}, ${num2}) = ${gcfVal}`
+        };
+      },
+
+      c7_p7: () => {
+        let gcfVal = randInt(3, 8);
+        let a = randInt(1, 3);
+        let b = randInt(2, 7);
+        return {
+          isPrereq: true, grade: 7, gradeTag: 'Grade 7 Prereq', topicId: 'c7_p7',
+          prompt: 'Factor the linear expression by removing the GCF:',
+          questionMath: `$$${gcfVal * a}x + ${gcfVal * b}$$`,
+          answerMath: `${gcfVal}(${a === 1 ? '' : a}x + ${b})`,
+          steps: `GCF = ${gcfVal} \\implies ${gcfVal}(${a === 1 ? '' : a}x + ${b})`
+        };
+      },
+
+      c7_p8: () => {
+        let c1 = randInt(2, 6), c2 = randInt(2, 6);
+        let e1 = randInt(1, 4), e2 = randInt(1, 4);
+        return {
+          isPrereq: true, grade: 8, gradeTag: 'Grade 8 Prereq', topicId: 'c7_p8',
+          prompt: 'Multiply the monomials:',
+          questionMath: `$$( ${c1}x^{${e1}} )( ${c2}x^{${e2}} )$$`,
+          answerMath: `${c1 * c2}x^{${e1 + e2}}`,
+          steps: `${c1} \\cdot ${c2} = ${c1*c2}, \\; x^{${e1}} \\cdot x^{${e2}} = x^{${e1+e2}}`
+        };
+      },
+
+      c8_p6: () => {
+        let a = randChoice([1, 2, 3]);
+        let c = randInt(1, 8);
+        let x = randChoice([-5, -4, -3, -2, 3, 4, 5]);
+        let ans = a * x * x + c;
+        return {
+          isPrereq: true, grade: 6, gradeTag: 'Grade 6 Prereq', topicId: 'c8_p6',
+          prompt: `Evaluate $${a === 1 ? '' : a}x^2 + ${c}$ when $x = ${x}$:`,
+          questionMath: ``,
+          answerMath: `${ans}`,
+          steps: `${a === 1 ? '' : a}(${x})^2 + ${c} = ${a === 1 ? '' : a}(${x*x}) + ${c} = ${ans}`
+        };
+      },
+
+      c9_p6: () => {
+        let root = randChoice([4, 5, 6, 7, 8, 9, 10, 11, 12]);
+        let sq = root * root;
+        return {
+          isPrereq: true, grade: 6, gradeTag: 'Grade 6 Prereq', topicId: 'c9_p6',
+          prompt: 'Find the square root:',
+          questionMath: `$$\\sqrt{${sq}}$$`,
+          answerMath: `${root}`,
+          steps: `${root} \\cdot ${root} = ${sq} \\implies \\sqrt{${sq}} = ${root}`
+        };
+      },
+
+      c9_p8: () => {
+        let val = randChoice([12, 18, 28, 35, 42, 50, 68, 75, 88]);
+        let est = Math.round(Math.sqrt(val));
+        return {
+          isPrereq: true, grade: 8, gradeTag: 'Grade 8 Prereq', topicId: 'c9_p8',
+          prompt: `Estimate $\\sqrt{${val}}$ to the nearest integer:`,
+          questionMath: ``,
+          answerMath: `${est}`,
+          steps: `Nearest perfect square is ${est*est} \\implies \\approx ${est}`
+        };
+      },
+
+      c10_p8: () => {
+        let root = randChoice([-4, -3, -2, 2, 3, 4, 5]);
+        let cube = root * root * root;
+        return {
+          isPrereq: true, grade: 8, gradeTag: 'Grade 8 Prereq', topicId: 'c10_p8',
+          prompt: 'Evaluate the cube root:',
+          questionMath: `$$\\sqrt[3]{${cube}}$$`,
+          answerMath: `${root}`,
+          steps: `(${root})^3 = ${cube} \\implies ${root}`
+        };
+      },
+
+      c11_p6: () => {
+        let meanTarget = randInt(8, 15);
+        let d1 = meanTarget - randInt(4, 7);
+        let d2 = meanTarget - randInt(1, 3);
+        let d3 = meanTarget + randInt(1, 3);
+        let d4 = meanTarget + randInt(4, 6);
+        let sum4 = d1 + d2 + d3 + d4;
+        let d5 = 5 * meanTarget - sum4;
+        let nums = [d1, d2, d3, d4, d5].sort((a,b)=>a-b);
+        return {
+          isPrereq: true, grade: 6, gradeTag: 'Grade 6 Prereq', topicId: 'c11_p6',
+          prompt: `Find the Mean of the dataset: $\\{${nums.join(', ')}\\}$:`,
+          questionMath: ``,
+          answerMath: `${meanTarget}`,
+          steps: `\\frac{${nums.join(' + ')}}{5} = \\frac{${5*meanTarget}}{5} = ${meanTarget}`
+        };
+      },
+
+      /* --- ALGEBRA 1 TARGET TOPIC GENERATORS --- */
+
+      c1_multistep: () => {
+        let x = randInt(-8, 12); if (x === 0) x = 5;
+        let a = randChoice([2, 3, 4, 5, -2, -3]);
+        let b = randInt(-6, 8);
+        let c = randInt(-10, 10);
+        let rhs = a * (x + b) + c;
+        let bStr = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+        let cStr = c >= 0 ? `+ ${c}` : `- ${Math.abs(c)}`;
+        
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c1_multistep',
+          prompt: 'Solve the equation. Show all steps:',
+          questionMath: `$$${a}(x ${bStr}) ${cStr} = ${rhs}$$`,
+          answerMath: `x = ${x}`,
+          steps: `${a}x + ${a*b} ${cStr} = ${rhs} \\implies ${a}x + ${a*b + c} = ${rhs} \\implies x = ${x}`
+        };
+      },
+
+      c1_bothsides: () => {
+        let x = randInt(-6, 9);
+        let a = randInt(2, 6);
+        let c = randInt(2, 6); while (c === a) c = randInt(2, 6);
+        let b = randInt(-10, 10);
+        let d = a * x + b - c * x;
+        let bStr = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+        let dStr = d >= 0 ? `+ ${d}` : `- ${Math.abs(d)}`;
+
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c1_bothsides',
+          prompt: 'Solve the linear equation with variables on both sides:',
+          questionMath: `$$${a}x ${bStr} = ${c}x ${dStr}$$`,
+          answerMath: `x = ${x}`,
+          steps: `${a-c}x = ${d - b} \\implies x = ${x}`
+        };
+      },
+
+      c1_absval: () => {
+        let x = randInt(1, 8);
+        let k = randInt(3, 10);
+        let a = randInt(1, 4);
+        let b = randInt(1, 5);
+        let rhs = k;
+
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c1_absval',
+          prompt: 'Solve the absolute value equation for all possible values of $x$:',
+          questionMath: `$$|${a}x - ${b}| = ${rhs}$$`,
+          answerMath: `x = ${formatFraction(rhs + b, a)}, \\; x = ${formatFraction(-rhs + b, a)}`,
+          steps: `${a}x - ${b} = ${rhs} \\text{ or } ${a}x - ${b} = -${rhs}`
+        };
+      },
+
+      c1_literal: () => {
+        const formulas = [
+          { name: 'Volume of Cone', formula: 'V = \\frac{1}{3} \\pi r^2 h', target: 'h', ans: 'h = \\frac{3V}{\\pi r^2}', step: '3V = \\pi r^2 h \\implies h = \\frac{3V}{\\pi r^2}' },
+          { name: 'Perimeter of Rectangle', formula: 'P = 2l + 2w', target: 'w', ans: 'w = \\frac{P - 2l}{2}', step: 'P - 2l = 2w \\implies w = \\frac{P - 2l}{2}' },
+          { name: 'Simple Interest', formula: 'I = Prt', target: 'r', ans: 'r = \\frac{I}{Pt}', step: 'Divide by Pt: r = \\frac{I}{Pt}' },
+          { name: 'Slope-Intercept Form', formula: 'Ax + By = C', target: 'y', ans: 'y = \\frac{C - Ax}{B}', step: 'By = C - Ax \\implies y = \\frac{C - Ax}{B}' },
+          { name: 'Area of Trapezoid', formula: 'A = \\frac{1}{2} h (b_1 + b_2)', target: 'h', ans: 'h = \\frac{2A}{b_1 + b_2}', step: '2A = h(b_1 + b_2) \\implies h = \\frac{2A}{b_1 + b_2}' }
+        ];
+        let f = randChoice(formulas);
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c1_literal',
+          prompt: `Solve the formula for the indicated variable ($${f.target}$):`,
+          questionMath: `$$${f.formula}$$`,
+          answerMath: `${f.ans}`,
+          steps: `${f.step}`
+        };
+      },
+
+      c2_multistep: () => {
+        let x = randInt(-4, 5);
+        let a = randChoice([-3, -2, 2, 3]);
+        let b = randInt(1, 6);
+        let rhs = a * x + b;
+        let comp = a < 0 ? '<' : '>';
+        let ansComp = comp;
+
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c2_multistep',
+          prompt: 'Solve the linear inequality and graph the solution on the number line:',
+          questionMath: `$$${a}x + ${b} ${comp} ${rhs}$$`,
+          answerMath: `x ${ansComp} ${x}`,
+          steps: `${a}x ${comp} ${rhs - b} \\implies x ${ansComp} ${x}`,
+          hasNumberLine: true,
+          numberLineData: { val: x, op: ansComp }
+        };
+      },
+
+      c2_compound: () => {
+        let a = randInt(-5, -1);
+        let b = randInt(1, 5);
+        let add = randInt(1, 3);
+        let op1 = '<';
+        let op2 = '<=';
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c2_compound',
+          prompt: 'Solve the compound inequality and graph the solution:',
+          questionMath: `$$${a - add} < x + ${add} \\le ${b + add}$$`,
+          answerMath: `${a} < x \\le ${b}`,
+          steps: `Subtract ${add} from all parts: ${a} < x \\le ${b}`,
+          hasNumberLine: true,
+          numberLineData: { isCompound: true, val: a, op: op1, val2: b, op2: op2 }
+        };
+      },
+
+      c2_absineq: () => {
+        let k = randInt(2, 5);
+        let h = randInt(1, 4);
+        let minVal = h - k;
+        let maxVal = h + k;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c2_absineq',
+          prompt: 'Solve the absolute value inequality and plot on the number line:',
+          questionMath: `$$|x - ${h}| < ${k}$$`,
+          answerMath: `${minVal} < x < ${maxVal}`,
+          steps: `-${k} < x - ${h} < ${k} \\implies ${minVal} < x < ${maxVal}`,
+          hasNumberLine: true,
+          numberLineData: { isCompound: true, val: minVal, op: '<', val2: maxVal, op2: '<' }
+        };
+      },
+
+      c3_graph: () => {
+        let m = randChoice([-3, -2, -1, 1, 2, 3]);
+        let b = randInt(-3, 3);
+        let bStr = b > 0 ? `+ ${b}` : b < 0 ? `- ${Math.abs(b)}` : '';
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c3_graph',
+          prompt: 'Graph the linear equation on the grid provided:',
+          questionMath: `$$y = ${m === 1 ? '' : m === -1 ? '-' : m}x ${bStr}$$`,
+          answerMath: `m = ${m}, \\; b = ${b}`,
+          steps: `Slope m = ${m}, y-intercept (0, ${b})`,
+          hasGrid: true,
+          gridData: { m: m, b: b }
+        };
+      },
+
+      c3_eval: () => {
+        let a = randInt(2, 5);
+        let b = randInt(-8, 8);
+        let xVal = randInt(-4, 6);
+        let ans = a * xVal + b;
+        let bStr = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c3_eval',
+          prompt: `Given $f(x) = ${a}x ${bStr}$, evaluate $f(${xVal})$:`,
+          questionMath: ``,
+          answerMath: `f(${xVal}) = ${ans}`,
+          steps: `f(${xVal}) = ${a}(${xVal}) ${bStr} = ${a*xVal} ${bStr} = ${ans}`
+        };
+      },
+
+      c3_intercepts: () => {
+        let xInt = randChoice([-6, -4, -3, 2, 3, 4, 6]);
+        let yInt = randChoice([-6, -4, -3, 2, 3, 4, 6]);
+        let C = xInt * yInt;
+        let A = yInt;
+        let B = xInt;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c3_intercepts',
+          prompt: 'Find the x-intercept and y-intercept of the line:',
+          questionMath: `$$${A}x + ${B}y = ${C}$$`,
+          answerMath: `\\text{x-int: } (${xInt}, 0), \\; \\text{y-int: } (0, ${yInt})`,
+          steps: `x-int (y=0): ${A}x = ${C} \\implies x = ${xInt}. \\; y-int (x=0): ${B}y = ${C} \\implies y = ${yInt}`
+        };
+      },
+
+      c4_twopoints: () => {
+        let m = randChoice([-3, -2, -1, 1, 2, 3]);
+        let b = randInt(-5, 5);
+        let x1 = randInt(-3, 2);
+        let x2 = x1 + randInt(2, 4);
+        let y1 = m * x1 + b;
+        let y2 = m * x2 + b;
+        let bStr = b > 0 ? `+ ${b}` : b < 0 ? `- ${Math.abs(b)}` : '';
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c4_twopoints',
+          prompt: `Write the equation of the line passing through $(${x1}, ${y1})$ and $(${x2}, ${y2})$ in slope-intercept form:`,
+          questionMath: ``,
+          answerMath: `y = ${m === 1 ? '' : m === -1 ? '-' : m}x ${bStr}`,
+          steps: `m = \\frac{${y2} - (${y1})}{${x2} - (${x1})} = ${m}, \\; y - ${y1} = ${m}(x - ${x1}) \\implies y = ${m}x ${bStr}`
+        };
+      },
+
+      c4_parallel: () => {
+        let m = randChoice([-4, -3, -2, 2, 3, 4]);
+        let x1 = randInt(-3, 4);
+        let y1 = randInt(-5, 5);
+        let bNew = y1 - m * x1;
+        let bStr = bNew > 0 ? `+ ${bNew}` : bNew < 0 ? `- ${Math.abs(bNew)}` : '';
+        let bOrig = bNew + randChoice([2, 4, -3]);
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c4_parallel',
+          prompt: `Write equation of line parallel to $y = ${m}x + ${bOrig}$ passing through $(${x1}, ${y1})$:`,
+          questionMath: ``,
+          answerMath: `y = ${m}x ${bStr}`,
+          steps: `Parallel slope m = ${m}. \\; y - ${y1} = ${m}(x - ${x1}) \\implies y = ${m}x ${bStr}`
+        };
+      },
+
+      c4_seq: () => {
+        let a1 = randInt(2, 12);
+        let d = randInt(3, 7);
+        let n = randInt(8, 15);
+        let an = a1 + (n - 1) * d;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c4_seq',
+          prompt: `Given arithmetic sequence $${a1}, ${a1+d}, ${a1+2*d}, \\dots$, find the $${n}^{\\text{th}}$ term ($a_{${n}}$):`,
+          questionMath: ``,
+          answerMath: `a_{${n}} = ${an}`,
+          steps: `a_n = a_1 + (n-1)d \\implies a_{${n}} = ${a1} + (${n}-1)(${d}) = ${an}`
+        };
+      },
+
+      c5_sub: () => {
+        let x = randInt(1, 5);
+        let y = randInt(1, 6);
+        let m = randInt(2, 4);
+        let b = y - m * x;
+        let bStr = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+        let c = randInt(2, 5);
+        let rhs2 = x + c * y;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c5_sub',
+          prompt: 'Solve the system of linear equations using substitution:',
+          questionMath: `$$\\begin{cases} y = ${m}x ${bStr} \\\\ x + ${c}y = ${rhs2} \\end{cases}$$`,
+          answerMath: `(${x}, ${y})`,
+          steps: `Substitute y: x + ${c}(${m}x ${bStr}) = ${rhs2} \\implies x = ${x}, \\; y = ${y}`
+        };
+      },
+
+      c5_elim: () => {
+        let x = randInt(-4, 5);
+        let y = randInt(-3, 6);
+        let a1 = randInt(2, 4);
+        let b1 = randInt(1, 4);
+        let rhs1 = a1 * x + b1 * y;
+        let a2 = a1;
+        let b2 = b1 + randInt(2, 5);
+        let rhs2 = a2 * x + b2 * y;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c5_elim',
+          prompt: 'Solve the system of linear equations using elimination:',
+          questionMath: `$$\\begin{cases} ${a1}x + ${b1}y = ${rhs1} \\\\ ${a2}x + ${b2}y = ${rhs2} \\end{cases}$$`,
+          answerMath: `(${x}, ${y})`,
+          steps: `Subtract equations: ${b2 - b1}y = ${rhs2 - rhs1} \\implies y = ${y}, \\; x = ${x}`
+        };
+      },
+
+      c5_word: () => {
+        let tPrice = randChoice([5, 8, 10]);
+        let sPrice = randChoice([3, 4, 5]);
+        let numAdults = randInt(10, 30);
+        let numStudents = randInt(20, 50);
+        let totalCount = numAdults + numStudents;
+        let totalRev = numAdults * tPrice + numStudents * sPrice;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c5_word',
+          prompt: `Tickets cost $${tPrice} for adults and $${sPrice} for students. A total of ${totalCount} tickets were sold for $${totalRev}. How many adult tickets ($a$) and student tickets ($s$) were sold?`,
+          questionMath: ``,
+          answerMath: `a = ${numAdults}, \\; s = ${numStudents}`,
+          steps: `a + s = ${totalCount}, \\; ${tPrice}a + ${sPrice}s = ${totalRev} \\implies a = ${numAdults}, s = ${numStudents}`
+        };
+      },
+
+      c6_laws: () => {
+        let p1 = randInt(2, 4), p2 = randInt(2, 5);
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c6_laws',
+          prompt: 'Simplify the expression completely using exponent laws:',
+          questionMath: `$$(3x^{${p1}}y^2)^2 \\cdot x^{${p2}}$$`,
+          answerMath: `9x^{${2*p1 + p2}}y^4`,
+          steps: `(9x^{${2*p1}}y^4) \\cdot x^{${p2}} = 9x^{${2*p1 + p2}}y^4`
+        };
+      },
+
+      c6_rational_exp: () => {
+        let b = randChoice([2, 3, 4, 5]);
+        let exp = randChoice([2, 3]);
+        let base = Math.pow(b, exp === 2 ? 2 : 3);
+        let num = randChoice([1, 2, 3]);
+        let ans = Math.pow(b, num);
+        let den = exp;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c6_rational_exp',
+          prompt: 'Evaluate the expression with rational exponents:',
+          questionMath: `$$${base}^{\\frac{${num}}{${den}}}$$`,
+          answerMath: `${ans}`,
+          steps: `(${base}^{1/${den}})^{${num}} = (${b})^{${num}} = ${ans}`
+        };
+      },
+
+      c6_growth: () => {
+        let a = randChoice([100, 200, 500, 1000]);
+        let rPct = randChoice([5, 10, 20, 25]);
+        let t = randInt(2, 4);
+        let rate = rPct / 100;
+        let ans = Math.round(a * Math.pow(1 + rate, t));
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c6_growth',
+          prompt: `An initial investment of $${a} grows at a rate of ${rPct}% per year ($y = a(1+r)^t$). Find the value after $t = ${t}$ years:`,
+          questionMath: ``,
+          answerMath: `\\$${ans}`,
+          steps: `y = ${a}(1 + ${rate})^{${t}} = ${a}(${1 + rate})^{${t}} \\approx ${ans}`
+        };
+      },
+
+      c6_like_bases: () => {
+        let base = randChoice([2, 3, 5, 10]);
+        let x = randInt(1, 5);
+        let a = randChoice([1, 2, 3]);
+        let c = randInt(-3, 3);
+        let lhsExpVal = a * x + c;
+        while (lhsExpVal <= 0 || lhsExpVal > 6) {
+          x = randInt(1, 5);
+          a = randChoice([1, 2, 3]);
+          c = randInt(-3, 3);
+          lhsExpVal = a * x + c;
+        }
+        let rhsVal = Math.pow(base, lhsExpVal);
+        let cStr = c > 0 ? `+ ${c}` : c < 0 ? `- ${Math.abs(c)}` : '';
+        let aStr = a === 1 ? '' : a;
+
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c6_like_bases',
+          prompt: 'Solve the exponential equation by matching bases (Equate exponents):',
+          questionMath: `$$${base}^{${aStr}x ${cStr}} = ${rhsVal}$$`,
+          answerMath: `x = ${x}`,
+          steps: `${base}^{${aStr}x ${cStr}} = ${base}^{${lhsExpVal}} \\implies ${aStr}x ${cStr} = ${lhsExpVal} \\implies x = ${x}`
+        };
+      },
+
+      c7_poly_ops: () => {
+        let a = randInt(1, 4), b = randInt(1, 6);
+        let c = randInt(1, 3), d = randInt(-6, 6); if (d === 0) d = 2;
+        let quad = a * c;
+        let lin = a * d + b * c;
+        let constTerm = b * d;
+        let linStr = lin > 0 ? `+ ${lin}` : lin < 0 ? `- ${Math.abs(lin)}` : '';
+        let constStr = constTerm > 0 ? `+ ${constTerm}` : constTerm < 0 ? `- ${Math.abs(constTerm)}` : '';
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c7_poly_ops',
+          prompt: 'Multiply the binomials using FOIL or distributive property:',
+          questionMath: `$$( ${a === 1 ? '' : a}x + ${b} )( ${c === 1 ? '' : c}x ${d > 0 ? '+ ' + d : '- ' + Math.abs(d)} )$$`,
+          answerMath: `${quad === 1 ? '' : quad}x^2 ${linStr}x ${constStr}`,
+          steps: `${quad}x^2 + (${a*d} + ${b*c})x + (${b*d}) = ${quad}x^2 ${linStr}x ${constStr}`
+        };
+      },
+
+      c7_factor_gcf: () => {
+        let gcfCoeff = randInt(2, 6);
+        let a = randInt(1, 4);
+        let b = randInt(2, 8);
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c7_factor_gcf',
+          prompt: 'Factor out the greatest common monomial factor (GCF):',
+          questionMath: `$$${gcfCoeff * a}x^2 + ${gcfCoeff * b}x$$`,
+          answerMath: `${gcfCoeff}x(${a === 1 ? '' : a}x + ${b})`,
+          steps: `GCF = ${gcfCoeff}x \\implies ${gcfCoeff}x(${a === 1 ? '' : a}x + ${b})`
+        };
+      },
+
+      c7_factor_quad: () => {
+        let r1 = randInt(-6, 6); if (r1 === 0) r1 = 2;
+        let r2 = randInt(-6, 6); if (r2 === 0 || r2 === r1) r2 = -3;
+        let b = -(r1 + r2);
+        let c = r1 * r2;
+        let bStr = b > 0 ? `+ ${b}` : b < 0 ? `- ${Math.abs(b)}` : '';
+        let cStr = c > 0 ? `+ ${c}` : c < 0 ? `- ${Math.abs(c)}` : '';
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c7_factor_quad',
+          prompt: 'Factor the quadratic trinomial completely:',
+          questionMath: `$$x^2 ${bStr}x ${cStr}$$`,
+          answerMath: `(x ${r1 > 0 ? '- ' + r1 : '+ ' + Math.abs(r1)})(x ${r2 > 0 ? '- ' + r2 : '+ ' + Math.abs(r2)})`,
+          steps: `Find two numbers that multiply to ${c} and add to ${-b}: ${-r1} and ${-r2}`
+        };
+      },
+
+      c7_solve_zero: () => {
+        let x1 = randInt(-8, 8); if (x1 === 0) x1 = 3;
+        let x2 = randInt(-8, 8); if (x2 === 0 || x2 === x1) x2 = -4;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c7_solve_zero',
+          prompt: 'Solve the equation using the Zero-Product Property:',
+          questionMath: `$$(x ${x1 > 0 ? '- ' + x1 : '+ ' + Math.abs(x1)})(x ${x2 > 0 ? '- ' + x2 : '+ ' + Math.abs(x2)}) = 0$$`,
+          answerMath: `x = ${x1}, \\; x = ${x2}`,
+          steps: `Set each factor equal to zero: x - ${x1} = 0 \\implies x = ${x1}, \\; x - ${x2} = 0 \\implies x = ${x2}`
+        };
+      },
+
+      c8_vertex: () => {
+        let h = randInt(-4, 4);
+        let k = randInt(-5, 5);
+        let a = randChoice([1, 2, -1]);
+        let b = -2 * a * h;
+        let c = a * h * h + k;
+        let bStr = b > 0 ? `+ ${b}` : b < 0 ? `- ${Math.abs(b)}` : '';
+        let cStr = c > 0 ? `+ ${c}` : c < 0 ? `- ${Math.abs(c)}` : '';
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c8_vertex',
+          prompt: 'Find the vertex and axis of symmetry for the quadratic function:',
+          questionMath: `$$f(x) = ${a === 1 ? '' : a === -1 ? '-' : a}x^2 ${bStr}x ${cStr}$$`,
+          answerMath: `\\text{Vertex: } (${h}, ${k}), \\; \\text{Axis of Symmetry: } x = ${h}`,
+          steps: `x = \\frac{-b}{2a} = \\frac{${-b}}{${2*a}} = ${h}, \\; y = f(${h}) = ${k}`
+        };
+      },
+
+      c8_transform: () => {
+        let h = randInt(1, 5);
+        let k = randInt(1, 5);
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c8_transform',
+          prompt: 'Describe the transformations from parent graph $f(x) = x^2$:',
+          questionMath: `$$g(x) = (x - ${h})^2 + ${k}$$`,
+          answerMath: `\\text{Shift right } ${h} \\text{ units and up } ${k} \\text{ units}`,
+          steps: `(x - h)^2 + k \\implies \\text{Right } ${h}, \\text{ Up } ${k}`
+        };
+      },
+
+      c8_graph: () => {
+        let a = 1;
+        let h = randInt(-2, 2);
+        let k = randInt(-3, 1);
+        let hStr = h > 0 ? `- ${h}` : h < 0 ? `+ ${Math.abs(h)}` : '';
+        let kStr = k > 0 ? `+ ${k}` : k < 0 ? `- ${Math.abs(k)}` : '';
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c8_graph',
+          prompt: 'Graph the parabola on the coordinate grid:',
+          questionMath: `$$y = (x ${hStr})^2 ${kStr}$$`,
+          answerMath: `\\text{Vertex: } (${h}, ${k})`,
+          steps: `Vertex at (${h}, ${k}), opens upwards`,
+          hasGrid: true,
+          gridData: { isQuad: true, qA: a, qH: h, qK: k }
+        };
+      },
+
+      c9_sqroot: () => {
+        let k = randChoice([2, 3, 4, 5]);
+        let x = randChoice([3, 4, 5, 6, 7]);
+        let rhs = k * x * x;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c9_sqroot',
+          prompt: 'Solve the equation by taking square roots:',
+          questionMath: `$$${k}x^2 = ${rhs}$$`,
+          answerMath: `x = \\pm ${x}`,
+          steps: `x^2 = ${rhs / k} \\implies x = \\pm \\sqrt{${rhs/k}} = \\pm ${x}`
+        };
+      },
+
+      c9_quadformula: () => {
+        let a = 1;
+        let r1 = randInt(-5, 5); if (r1 === 0) r1 = 2;
+        let r2 = randInt(-5, 5); if (r2 === 0 || r2 === r1) r2 = -3;
+        let b = -(r1 + r2);
+        let c = r1 * r2;
+        let bStr = b > 0 ? `+ ${b}` : b < 0 ? `- ${Math.abs(b)}` : '';
+        let cStr = c > 0 ? `+ ${c}` : c < 0 ? `- ${Math.abs(c)}` : '';
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c9_quadformula',
+          prompt: 'Solve using the Quadratic Formula ($x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$):',
+          questionMath: `$$x^2 ${bStr}x ${cStr} = 0$$`,
+          answerMath: `x = ${r1}, \\; x = ${r2}`,
+          steps: `b^2 - 4ac = ${b*b - 4*c} \\implies x = \\frac{${-b} \\pm \\sqrt{${b*b - 4*c}}}{2} \\implies x = ${r1}, ${r2}`
+        };
+      },
+
+      c9_simp_rad: () => {
+        let outside = randInt(2, 5);
+        let inside = randChoice([2, 3, 5, 6, 7]);
+        let square = outside * outside;
+        let num = square * inside;
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c9_simp_rad',
+          prompt: 'Simplify the radical expression completely:',
+          questionMath: `$$\\sqrt{${num}}$$`,
+          answerMath: `${outside}\\sqrt{${inside}}`,
+          steps: `\\sqrt{${square} \\cdot ${inside}} = \\sqrt{${square}} \\cdot \\sqrt{${inside}} = ${outside}\\sqrt{${inside}}`
+        };
+      },
+
+      c10_solve_rad: () => {
+        let x = randInt(2, 10);
+        let a = randInt(2, 5);
+        let b = randInt(1, 9);
+        let val = randInt(3, 8);
+        let exactInside = val * val;
+        let actualX = (exactInside - b) / a;
+        while (!Number.isInteger(actualX) || actualX < 1) {
+          x = randInt(2, 10);
+          val = randInt(3, 8);
+          exactInside = val * val;
+          actualX = (exactInside - b) / a;
+        }
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c10_solve_rad',
+          prompt: 'Solve the radical equation for $x$:',
+          questionMath: `$$\\sqrt{${a}x + ${b}} = ${val}$$`,
+          answerMath: `x = ${actualX}`,
+          steps: `${a}x + ${b} = ${val}^2 = ${exactInside} \\implies ${a}x = ${exactInside - b} \\implies x = ${actualX}`
+        };
+      },
+
+      c10_domain_rad: () => {
+        let a = randInt(2, 9);
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c10_domain_rad',
+          prompt: 'Find the domain of the square root function:',
+          questionMath: `$$f(x) = \\sqrt{x - ${a}}$$`,
+          answerMath: `x \\ge ${a}`,
+          steps: `x - ${a} \\ge 0 \\implies x \\ge ${a}`
+        };
+      },
+
+      c10_ops_rad: () => {
+        let rad = randChoice([2, 3, 5, 6, 7]);
+        let a = randInt(2, 8);
+        let b = randInt(2, 8);
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c10_ops_rad',
+          prompt: 'Simplify by combining like radical terms:',
+          questionMath: `$$${a}\\sqrt{${rad}} + ${b}\\sqrt{${rad}}$$`,
+          answerMath: `${a + b}\\sqrt{${rad}}`,
+          steps: `(${a} + ${b})\\sqrt{${rad}} = ${a + b}\\sqrt{${rad}}`
+        };
+      },
+
+      c11_stats: () => {
+        let nums = [randInt(2, 8), randInt(3, 9), randInt(4, 10), randInt(5, 12), randInt(6, 14)].sort((a,b)=>a-b);
+        let sum = nums.reduce((a,b)=>a+b, 0);
+        let mean = (sum / nums.length).toFixed(1);
+        if (mean.endsWith('.0')) mean = Math.round(sum / nums.length);
+        let median = nums[2];
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c11_stats',
+          prompt: `Find the Mean and Median for the set: $\\{${nums.join(', ')}\\}$:`,
+          questionMath: ``,
+          answerMath: `\\text{Mean: } ${mean}, \\; \\text{Median: } ${median}`,
+          steps: `Mean = \\frac{${sum}}{5} = ${mean}, \\; Median = ${median}`
+        };
+      },
+
+      c11_five_num: () => {
+        let nums = [1, 3, 5, 7, 9, 11, 13].map(x => x + randInt(0, 3)).sort((a,b)=>a-b);
+        let min = nums[0], q1 = nums[1], med = nums[3], q3 = nums[5], max = nums[6];
+        return {
+          isPrereq: false, grade: 'alg1', gradeTag: 'Algebra 1', topicId: 'c11_five_num',
+          prompt: `Find the Five-Number Summary for dataset: $\\{${nums.join(', ')}\\}$:`,
+          questionMath: ``,
+          answerMath: `\\text{Min: } ${min}, \\; Q_1: ${q1}, \\; \\text{Med: } ${med}, \\; Q_3: ${q3}, \\; \\text{Max: } ${max}`,
+          steps: `Min = ${min}, Q_1 = ${q1}, Median = ${med}, Q_3 = ${q3}, Max = ${max}`
+        };
+      }
+    };
+
+    /* Topic Accordion UI Builder */
+    function buildTopicAccordions() {
+      const container = document.getElementById('topic-accordions');
+      if (!container) return;
+      container.innerHTML = '';
+
+      CHAPTER_DATA.forEach(ch => {
+        const details = document.createElement('details');
+        details.className = 'chapter-details border border-slate-200 rounded-lg overflow-hidden bg-slate-50/50 group';
+        details.dataset.chapterId = ch.id;
+        if (ch.id === 1) details.open = true;
+
+        let topicsHtml = '';
+        ch.topics.forEach(t => {
+          let prereqsHtml = '';
+          if (t.prereqs && t.prereqs.length > 0) {
+            prereqsHtml = `
+              <div class="ml-6 pl-2 border-l-2 border-amber-300 space-y-1 my-1">
+                ${t.prereqs.map(p => `
+                  <label class="flex items-center gap-1.5 text-[11px] text-amber-900 cursor-pointer hover:text-amber-700">
+                    <input type="checkbox" data-topic-id="${p.id}" data-parent-id="${t.id}" data-chapter-id="${ch.id}" class="topic-checkbox prereq-checkbox rounded text-amber-600 focus:ring-amber-500" checked>
+                    <span>${p.name}</span>
+                  </label>
+                `).join('')}
+              </div>
+            `;
+          }
+
+          topicsHtml += `
+            <div class="py-1">
+              <label class="flex items-center gap-2 font-medium text-slate-800 cursor-pointer hover:text-indigo-600">
+                <input type="checkbox" data-topic-id="${t.id}" data-chapter-id="${ch.id}" class="topic-checkbox parent-topic-checkbox rounded text-indigo-600 focus:ring-indigo-500" checked>
+                <span>${t.name}</span>
+              </label>
+              ${prereqsHtml}
+            </div>
+          `;
+        });
+
+        details.innerHTML = `
+          <summary class="px-3 py-2 bg-slate-100 hover:bg-slate-200 cursor-pointer font-bold text-slate-700 flex justify-between items-center select-none text-xs">
+            <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+              <input type="checkbox" data-chapter-id="${ch.id}" class="chapter-checkbox rounded text-indigo-600 focus:ring-indigo-500" checked>
+              <span>${ch.title}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-semibold text-slate-500 chapter-count-badge"></span>
+              <i class="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform"></i>
+            </div>
+          </summary>
+          <div class="p-2.5 space-y-1 bg-white border-t border-slate-200 text-xs">
+            ${topicsHtml}
+          </div>
+        `;
+
+        container.appendChild(details);
+      });
+
+      attachTopicSelectorEvents();
+      updateSelectedTopicsState();
+    }
+
+    function attachTopicSelectorEvents() {
+      // 1. Chapter Checkbox toggles all topics/prereqs inside chapter
+      document.querySelectorAll('.chapter-checkbox').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          const chId = e.target.getAttribute('data-chapter-id');
+          const isChecked = e.target.checked;
+          document.querySelectorAll(`.topic-checkbox[data-chapter-id="${chId}"]`).forEach(tCb => {
+            tCb.checked = isChecked;
+          });
+          updateSelectedTopicsState();
+        });
+      });
+
+      // 2. Parent Topic Checkbox toggles all sub-prereqs
+      document.querySelectorAll('.parent-topic-checkbox').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          const tId = e.target.getAttribute('data-topic-id');
+          const isChecked = e.target.checked;
+          document.querySelectorAll(`.prereq-checkbox[data-parent-id="${tId}"]`).forEach(pCb => {
+            pCb.checked = isChecked;
+          });
+          updateChapterCheckboxState(e.target.getAttribute('data-chapter-id'));
+          updateSelectedTopicsState();
+        });
+      });
+
+      // 3. Prereq Checkbox updates parent topic & chapter checkboxes
+      document.querySelectorAll('.prereq-checkbox').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          const parentId = e.target.getAttribute('data-parent-id');
+          const chId = e.target.getAttribute('data-chapter-id');
+          const parentCb = document.querySelector(`.parent-topic-checkbox[data-topic-id="${parentId}"]`);
+          
+          if (parentCb) {
+            const siblingPrereqs = document.querySelectorAll(`.prereq-checkbox[data-parent-id="${parentId}"]`);
+            const anyChecked = Array.from(siblingPrereqs).some(p => p.checked);
+            if (e.target.checked) parentCb.checked = true;
+          }
+
+          updateChapterCheckboxState(chId);
+          updateSelectedTopicsState();
+        });
+      });
+    }
+
+    function updateChapterCheckboxState(chId) {
+      const chCb = document.querySelector(`.chapter-checkbox[data-chapter-id="${chId}"]`);
+      if (!chCb) return;
+
+      const allBoxes = document.querySelectorAll(`.topic-checkbox[data-chapter-id="${chId}"]`);
+      const checkedBoxes = document.querySelectorAll(`.topic-checkbox[data-chapter-id="${chId}"]:checked`);
+      
+      chCb.checked = checkedBoxes.length > 0;
+      chCb.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < allBoxes.length;
+    }
+
+    function updateSelectedTopicsState() {
+      const checkboxes = document.querySelectorAll('.topic-checkbox:checked');
+      appState.selectedTopics = Array.from(checkboxes).map(cb => cb.getAttribute('data-topic-id'));
+
+      // Update Chapter badges
+      document.querySelectorAll('.chapter-details').forEach(details => {
+        const chId = details.dataset.chapterId;
+        const total = details.querySelectorAll('.topic-checkbox').length;
+        const checked = details.querySelectorAll('.topic-checkbox:checked').length;
+        const badge = details.querySelector('.chapter-count-badge');
+        if (badge) {
+          badge.textContent = `${checked}/${total}`;
+          badge.className = `text-[10px] font-semibold ${checked > 0 ? 'text-indigo-600' : 'text-slate-400'}`;
+        }
+      });
+    }
+
+    function toggleAllTopics(checked) {
+      document.querySelectorAll('.chapter-checkbox, .topic-checkbox').forEach(cb => {
+        cb.checked = checked;
+        cb.indeterminate = false;
+      });
+      updateSelectedTopicsState();
+    }
+
+    function toggleExpandAll(expand) {
+      document.querySelectorAll('.chapter-details').forEach(d => {
+        d.open = expand;
+      });
+    }
+
+    /* Helper: Round-Robin Topic Sampler */
+    function sampleTopicsRoundRobin(topicIdList, targetCount) {
+      if (!topicIdList || topicIdList.length === 0 || targetCount <= 0) return [];
+
+      let shuffled = [...topicIdList].sort(() => Math.random() - 0.5);
+      let result = [];
+      let idx = 0;
+
+      for (let i = 0; i < targetCount; i++) {
+        result.push(shuffled[idx % shuffled.length]);
+        idx++;
+      }
+
+      return result;
+    }
+
+    // Generator Engine - Groups Fluency FIRST, then Prereqs, then Target Alg 1 Standards
+    function generateWorksheet(keepPinned = true) {
+      updateSelectedTopicsState();
+
+      let numFluency = parseInt(document.getElementById('cfg-fluency-count')?.value || 0);
+      let numPrereqs = parseInt(document.getElementById('cfg-prereq-count')?.value || 0);
+      let numStandards = parseInt(document.getElementById('cfg-standard-count')?.value || 0);
+
+      appState.numFluency = numFluency;
+      appState.numPrereqs = numPrereqs;
+      appState.numStandards = numStandards;
+
+      if (numFluency === 0 && numPrereqs === 0 && numStandards === 0) {
+        showToast('Please set at least 1 problem in Fluency, Prereq, or Standard count.', 'warning');
+        return;
+      }
+
+      // 1. Process Number Fluency Problems (Integer Operations)
+      const fluencyKeys = ['nf_int_add', 'nf_int_sub', 'nf_int_mult', 'nf_int_div', 'nf_int_mixed'];
+      let finalFluency = [];
+      if (keepPinned) {
+        finalFluency = appState.problems.filter(p => p.pinned && p.sectionType === 'fluency');
+      }
+      let selectedFluencyKeys = sampleTopicsRoundRobin(fluencyKeys, numFluency - finalFluency.length);
+      selectedFluencyKeys.forEach(k => {
+        if (PROBLEM_GENERATORS[k]) {
+          let prob = PROBLEM_GENERATORS[k]();
+          prob.id = 'p_' + Math.random().toString(36).substring(2, 9);
+          prob.pinned = false;
+          finalFluency.push(prob);
+        }
+      });
+      if (finalFluency.length > numFluency) finalFluency = finalFluency.slice(0, numFluency);
+
+      // Separate selected topic keys into Prereqs vs Standards using TOPIC_META map
+      let selectedPrereqKeys = [];
+      let selectedStandardKeys = [];
+
+      appState.selectedTopics.forEach(id => {
+        if (PROBLEM_GENERATORS[id]) {
+          const meta = TOPIC_META[id];
+          if (meta && meta.isPrereq) {
+            selectedPrereqKeys.push(id);
+          } else {
+            selectedStandardKeys.push(id);
+          }
+        }
+      });
+
+      // Validation warnings
+      if (numPrereqs > 0 && selectedPrereqKeys.length === 0) {
+        showToast('No prerequisite skills checked. Please select at least one Gr 6–8 prereq topic.', 'warning');
+        selectedPrereqKeys = Object.keys(TOPIC_META).filter(k => TOPIC_META[k].isPrereq && PROBLEM_GENERATORS[k]);
+      }
+      if (numStandards > 0 && selectedStandardKeys.length === 0) {
+        showToast('No Algebra 1 standards checked. Please select at least one standard topic.', 'warning');
+        selectedStandardKeys = Object.keys(TOPIC_META).filter(k => !TOPIC_META[k].isPrereq && PROBLEM_GENERATORS[k]);
+      }
+
+      // 2. Process Prerequisite Problems (Round-Robin Topic Sampling)
+      let finalPrereqs = [];
+      if (keepPinned) {
+        finalPrereqs = appState.problems.filter(p => p.pinned && p.isPrereq && p.sectionType !== 'fluency');
+      }
+      let sampledPrereqKeys = sampleTopicsRoundRobin(selectedPrereqKeys, numPrereqs - finalPrereqs.length);
+      sampledPrereqKeys.forEach(k => {
+        if (PROBLEM_GENERATORS[k]) {
+          let prob = PROBLEM_GENERATORS[k]();
+          prob.id = 'p_' + Math.random().toString(36).substring(2, 9);
+          prob.pinned = false;
+          finalPrereqs.push(prob);
+        }
+      });
+      if (finalPrereqs.length > numPrereqs) finalPrereqs = finalPrereqs.slice(0, numPrereqs);
+
+      // 3. Process Standard Problems (Round-Robin Topic Sampling)
+      let finalStandards = [];
+      if (keepPinned) {
+        finalStandards = appState.problems.filter(p => p.pinned && !p.isPrereq);
+      }
+      let sampledStandardKeys = sampleTopicsRoundRobin(selectedStandardKeys, numStandards - finalStandards.length);
+      sampledStandardKeys.forEach(k => {
+        if (PROBLEM_GENERATORS[k]) {
+          let prob = PROBLEM_GENERATORS[k]();
+          prob.id = 'p_' + Math.random().toString(36).substring(2, 9);
+          prob.pinned = false;
+          finalStandards.push(prob);
+        }
+      });
+      if (finalStandards.length > numStandards) finalStandards = finalStandards.slice(0, numStandards);
+
+      // Combine all 3 sections in sequential order
+      appState.problems = [...finalFluency, ...finalPrereqs, ...finalStandards];
+      renderWorksheet();
+      showToast(`Generated ${numFluency} Fluency, ${numPrereqs} Prereq, and ${numStandards} Standard problems`, 'success');
+    }
+
+    /* DOM Render Engine for the Worksheet */
+    function renderWorksheet() {
+      // 1. Sync Layout Controls
+      appState.title = document.getElementById('cfg-title').value;
+      appState.columns = parseInt(document.getElementById('cfg-columns').value);
+      appState.spacing = document.getElementById('cfg-spacing').value;
+      appState.answerMode = document.getElementById('cfg-answer-mode').value;
+
+      appState.headerFields.name = document.getElementById('cfg-hdr-name').checked;
+      appState.headerFields.date = document.getElementById('cfg-hdr-date').checked;
+      appState.headerFields.period = document.getElementById('cfg-hdr-period').checked;
+      appState.headerFields.score = document.getElementById('cfg-hdr-score').checked;
+
+      // 2. Render Header
+      document.getElementById('out-title').textContent = appState.title;
+      document.getElementById('out-score-box').style.display = appState.headerFields.score ? 'block' : 'none';
+      document.getElementById('out-hdr-name').style.display = appState.headerFields.name ? 'block' : 'none';
+      document.getElementById('out-hdr-date').style.display = appState.headerFields.date ? 'block' : 'none';
+      document.getElementById('out-hdr-period').style.display = appState.headerFields.period ? 'block' : 'none';
+
+      // 3. Partition Problems into 3 Sections
+      const grid = document.getElementById('problems-grid');
+      grid.innerHTML = '';
+
+      let spacingPx = appState.spacing === 'compact' ? '40px' : appState.spacing === 'spacious' ? '120px' : '75px';
+
+      const fluencyProbs = appState.problems.filter(p => p.sectionType === 'fluency');
+      const prereqProbs = appState.problems.filter(p => p.isPrereq && p.sectionType !== 'fluency');
+      const targetProbs = appState.problems.filter(p => !p.isPrereq);
+
+      let globalIndex = 0;
+
+      const renderGroupGrid = (probList, titleText, badgeBg) => {
+        if (probList.length === 0) return;
+
+        const sectionWrapper = document.createElement('div');
+        sectionWrapper.className = 'space-y-2';
+
+        sectionWrapper.innerHTML = `
+          <div class="border-b-2 border-slate-800 pb-0.5 flex items-center justify-between">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800">${titleText}</h3>
+            <span class="text-[10px] font-semibold text-slate-500">${probList.length} Questions</span>
+          </div>
+          <div class="grid ${appState.columns === 1 ? 'grid-cols-1' : 'grid-cols-2'} gap-x-5 gap-y-3 group-grid"></div>
+        `;
+
+        const subGrid = sectionWrapper.querySelector('.group-grid');
+
+        probList.forEach(prob => {
+          globalIndex++;
+          const idx = globalIndex - 1;
+          const card = document.createElement('div');
+          card.className = `problem-card border border-slate-200 rounded-lg p-2.5 bg-white relative group transition ${
+            prob.pinned ? 'ring-2 ring-amber-400 bg-amber-50/20' : ''
+          }`;
+
+          let gridSvg = prob.hasGrid ? generateSVGGrid(
+            prob.gridData?.m ?? 1, 
+            prob.gridData?.b ?? 0, 
+            prob.gridData?.isQuad ?? false,
+            prob.gridData?.qA ?? 1,
+            prob.gridData?.qH ?? 0,
+            prob.gridData?.qK ?? 0
+          ) : '';
+
+          let numberLineSvg = prob.hasNumberLine ? generateSVGNumberLine(
+            prob.numberLineData?.val ?? 0,
+            prob.numberLineData?.op ?? '>',
+            prob.numberLineData?.isCompound ?? false,
+            prob.numberLineData?.val2 ?? null,
+            prob.numberLineData?.op2 ?? null
+          ) : '';
+
+          card.innerHTML = `
+            <!-- Problem Header Bar (Screen-Only Controls & Badges) -->
+            <div class="no-print flex items-center justify-between gap-2 mb-2 pb-1.5 border-b border-slate-100">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-extrabold text-slate-700 text-xs">Problem #${globalIndex}</span>
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${badgeBg}">${prob.gradeTag || 'Math'}</span>
+                ${prob.pinned ? '<span class="text-[10px] font-bold text-amber-700 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded flex items-center gap-1"><i class="fa-solid fa-thumbtack text-[9px]"></i> Pinned</span>' : ''}
+              </div>
+              <div class="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-md px-1.5 py-0.5 shadow-sm shrink-0">
+                <button onclick="moveProblem(${idx}, -1)" class="p-1 text-slate-400 hover:text-slate-700 text-xs transition" title="Move Up"><i class="fa-solid fa-arrow-up"></i></button>
+                <button onclick="moveProblem(${idx}, 1)" class="p-1 text-slate-400 hover:text-slate-700 text-xs transition" title="Move Down"><i class="fa-solid fa-arrow-down"></i></button>
+                <button onclick="togglePinProblem(${idx})" class="p-1 ${prob.pinned ? 'text-amber-600 font-bold' : 'text-slate-400 hover:text-amber-500'} text-xs transition" title="${prob.pinned ? 'Unpin' : 'Pin Problem'}"><i class="fa-solid fa-thumbtack"></i></button>
+                <button onclick="regenerateSingleProblem(${idx})" class="p-1 text-slate-400 hover:text-indigo-600 text-xs transition" title="Re-roll Values"><i class="fa-solid fa-arrows-rotate"></i></button>
+                <button onclick="openEditModal(${idx})" class="p-1 text-slate-400 hover:text-blue-600 text-xs transition" title="Edit Problem"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="deleteProblem(${idx})" class="p-1 text-slate-400 hover:text-red-600 text-xs transition" title="Delete"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+
+            <!-- Question & Workspace -->
+            <div class="flex gap-2 items-start">
+              <span class="font-bold text-slate-900 text-xs">${globalIndex}.</span>
+              <div class="flex-1 text-xs text-slate-800 leading-relaxed">
+                <div>${renderMathText(prob.prompt)}</div>
+                ${prob.questionMath ? `<div class="my-0.5 font-semibold">${renderMathText(prob.questionMath)}</div>` : ''}
+                ${gridSvg}
+                ${numberLineSvg}
+                
+                <div class="w-full border-b border-dashed border-slate-200 mt-1" style="height: ${spacingPx}"></div>
+              </div>
+            </div>
+          `;
+          subGrid.appendChild(card);
+        });
+
+        grid.appendChild(sectionWrapper);
+      };
+
+      // Section 1: Number Fluency FIRST
+      renderGroupGrid(fluencyProbs, 'Part I: Number Fluency (Integer Operations)', 'bg-emerald-100 text-emerald-800');
+
+      // Section 2: Foundational Skills Review SECOND
+      renderGroupGrid(prereqProbs, 'Part II: Foundational Prerequisite Skills Review (Grades 6–8)', 'bg-amber-100 text-amber-800');
+
+      // Section 3: Algebra 1 Core Practice THIRD
+      renderGroupGrid(targetProbs, 'Part III: Algebra 1 Core Standard Practice', 'bg-indigo-100 text-indigo-800');
+
+      // 4. Render Solutions / Key
+      renderAnswerKey();
+
+      // 5. Update Stats Bar
+      document.getElementById('stat-problem-count').innerHTML = `<i class="fa-solid fa-list-ol text-indigo-500"></i> ${appState.problems.length} Problems (${fluencyProbs.length} Fluency / ${prereqProbs.length} Prereq / ${targetProbs.length} Alg 1)`;
+      let pinnedCount = appState.problems.filter(p => p.pinned).length;
+      document.getElementById('stat-pinned-count').innerHTML = `<i class="fa-solid fa-thumbtack"></i> ${pinnedCount} Pinned`;
+    }
+
+    /* Render Answers (Upside Down or Separate Page) */
+    function renderAnswerKey() {
+      const upsideDownFooter = document.getElementById('upside-down-footer');
+      const separatePage = document.getElementById('separate-answer-page');
+      const upsideList = document.getElementById('upside-down-answers-list');
+      const separateGrid = document.getElementById('separate-answers-grid');
+
+      if (appState.answerMode === 'none') {
+        upsideDownFooter.classList.add('hidden');
+        separatePage.classList.add('hidden');
+        return;
+      }
+
+      if (appState.answerMode === 'upside_down') {
+        upsideDownFooter.classList.remove('hidden');
+        separatePage.classList.add('hidden');
+
+        upsideList.innerHTML = appState.problems.map((p, i) => `
+          <div><strong>${i + 1}.</strong> ${renderMathText(p.answerMath || 'N/A')}</div>
+        `).join('');
+      } else if (appState.answerMode === 'separate') {
+        upsideDownFooter.classList.add('hidden');
+        separatePage.classList.remove('hidden');
+        document.getElementById('ans-page-subtitle').textContent = appState.title;
+
+        separateGrid.innerHTML = appState.problems.map((p, i) => {
+          let solutionSvg = '';
+          if (p.hasNumberLine) {
+            solutionSvg = generateSVGNumberLine(
+              p.numberLineData?.val ?? 0,
+              p.numberLineData?.op ?? '>',
+              p.numberLineData?.isCompound ?? false,
+              p.numberLineData?.val2 ?? null,
+              p.numberLineData?.op2 ?? null,
+              true // Show plotted solution graph on Answer Key
+            );
+          } else if (p.hasGrid) {
+            solutionSvg = generateSVGGrid(
+              p.gridData?.m ?? 1, 
+              p.gridData?.b ?? 0, 
+              p.gridData?.isQuad ?? false,
+              p.gridData?.qA ?? 1,
+              p.gridData?.qH ?? 0,
+              p.gridData?.qK ?? 0,
+              true // Show plotted grid line/parabola on Answer Key
+            );
+          }
+          return `
+          <div class="border-b border-slate-200 pb-2">
+            <div class="font-bold text-slate-900">${i + 1}. Answer: ${renderMathText(p.answerMath || 'N/A')}</div>
+            ${p.steps ? `<div class="text-[11px] text-slate-600 font-mono mt-0.5">Steps: ${renderMathText(p.steps)}</div>` : ''}
+            ${solutionSvg ? `<div class="mt-1">${solutionSvg}</div>` : ''}
+          </div>
+        `;
+        }).join('');
+      }
+    }
+
+    /* Individual Problem Operations */
+    function togglePinProblem(index) {
+      appState.problems[index].pinned = !appState.problems[index].pinned;
+      renderWorksheet();
+      showToast(appState.problems[index].pinned ? 'Problem pinned' : 'Problem unpinned', 'info');
+    }
+
+    function regenerateSingleProblem(index) {
+      let prob = appState.problems[index];
+      let topicKey = prob.topicId;
+      if (!topicKey || !PROBLEM_GENERATORS[topicKey]) {
+        topicKey = prob.isPrereq ? 'c1_p6' : 'c1_multistep';
+      }
+      let genFunc = PROBLEM_GENERATORS[topicKey];
+      
+      let newProb = genFunc();
+      newProb.id = prob.id;
+      newProb.pinned = prob.pinned;
+      
+      appState.problems[index] = newProb;
+      renderWorksheet();
+      showToast(`Regenerated Problem #${index + 1}`, 'success');
+    }
+
+    function deleteProblem(index) {
+      appState.problems.splice(index, 1);
+      renderWorksheet();
+      showToast('Problem removed', 'warning');
+    }
+
+    function moveProblem(index, direction) {
+      let target = index + direction;
+      if (target < 0 || target >= appState.problems.length) return;
+      let temp = appState.problems[index];
+      appState.problems[index] = appState.problems[target];
+      appState.problems[target] = temp;
+      renderWorksheet();
+    }
+
+    /* Edit / Add Problem Modal Handlers */
+    function openEditModal(index = null) {
+      appState.editingProblemId = index;
+      const modal = document.getElementById('modal-edit');
+      
+      if (index !== null) {
+        let p = appState.problems[index];
+        document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-indigo-600"></i> Edit Problem #${index + 1}`;
+        document.getElementById('edit-prompt').value = p.prompt || '';
+        document.getElementById('edit-math').value = p.questionMath || '';
+        document.getElementById('edit-answer').value = p.answerMath || '';
+        document.getElementById('edit-steps').value = p.steps || '';
+        document.getElementById('edit-grid').checked = !!p.hasGrid;
+      } else {
+        document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-plus text-emerald-600"></i> Add Custom Problem`;
+        document.getElementById('edit-prompt').value = 'Solve the problem:';
+        document.getElementById('edit-math').value = '3x + 5 = 20';
+        document.getElementById('edit-answer').value = 'x = 5';
+        document.getElementById('edit-steps').value = '3x = 15 => x = 5';
+        document.getElementById('edit-grid').checked = false;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-edit').classList.add('hidden');
+      appState.editingProblemId = null;
+    }
+
+    function saveModalProblem() {
+      let promptVal = document.getElementById('edit-prompt').value;
+      let mathVal = document.getElementById('edit-math').value;
+      let answerVal = document.getElementById('edit-answer').value;
+      let stepsVal = document.getElementById('edit-steps').value;
+      let hasGridVal = document.getElementById('edit-grid').checked;
+
+      if (appState.editingProblemId !== null) {
+        let p = appState.problems[appState.editingProblemId];
+        p.prompt = promptVal;
+        p.questionMath = mathVal;
+        p.answerMath = answerVal;
+        p.steps = stepsVal;
+        p.hasGrid = hasGridVal;
+      } else {
+        appState.problems.push({
+          id: 'p_' + Math.random().toString(36).substring(2, 9),
+          isPrereq: false,
+          gradeTag: 'Custom',
+          prompt: promptVal,
+          questionMath: mathVal,
+          answerMath: answerVal,
+          steps: stepsVal,
+          hasGrid: hasGridVal,
+          pinned: true
+        });
+      }
+
+      closeModal();
+      renderWorksheet();
+      showToast('Problem saved successfully', 'success');
+    }
+
+    /* EVENT LISTENERS & INITIALIZATION */
+    window.addEventListener('DOMContentLoaded', () => {
+      buildTopicAccordions();
+
+      // Sidebar Action Binding
+      document.getElementById('btn-select-all').addEventListener('click', () => toggleAllTopics(true));
+      document.getElementById('btn-clear-all').addEventListener('click', () => toggleAllTopics(false));
+      document.getElementById('btn-expand-all').addEventListener('click', () => toggleExpandAll(true));
+      document.getElementById('btn-collapse-all').addEventListener('click', () => toggleExpandAll(false));
+      
+      document.getElementById('btn-apply-topics').addEventListener('click', () => generateWorksheet(false));
+      document.getElementById('btn-generate-all').addEventListener('click', () => generateWorksheet(true));
+      
+      document.getElementById('btn-pin-all').addEventListener('click', () => {
+        appState.problems.forEach(p => p.pinned = true);
+        renderWorksheet();
+      });
+      document.getElementById('btn-unpin-all').addEventListener('click', () => {
+        appState.problems.forEach(p => p.pinned = false);
+        renderWorksheet();
+      });
+
+      // Quick Settings Auto-Rerender
+      ['cfg-title', 'cfg-columns', 'cfg-spacing', 'cfg-answer-mode', 'cfg-hdr-name', 'cfg-hdr-date', 'cfg-hdr-period', 'cfg-hdr-score'].forEach(id => {
+        document.getElementById(id).addEventListener('change', renderWorksheet);
+      });
+
+      ['cfg-fluency-count', 'cfg-prereq-count', 'cfg-standard-count'].forEach(id => {
+        document.getElementById(id).addEventListener('change', () => generateWorksheet(true));
+      });
+
+      // Mobile Sidebar Slide-over Toggle
+      document.getElementById('btn-toggle-sidebar').addEventListener('click', () => {
+        const sidebar = document.getElementById('sidebar-panel');
+        sidebar.classList.toggle('hidden');
+      });
+
+      // Print / PDF Button
+      document.getElementById('btn-print').addEventListener('click', () => window.print());
+
+      // Modal Buttons
+      document.getElementById('btn-add-custom').addEventListener('click', () => openEditModal(null));
+      document.getElementById('btn-modal-close').addEventListener('click', closeModal);
+      document.getElementById('btn-modal-cancel').addEventListener('click', closeModal);
+      document.getElementById('btn-modal-save').addEventListener('click', saveModalProblem);
+
+      // Initial Generation
+      generateWorksheet(false);
+    });
+  </script>
+</body>
+</html>
