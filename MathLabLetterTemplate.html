@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academy Math Lab — Intervention Form Letter Generator</title>
+    <!-- Load Tailwind CSS for responsive screen controls and crisp print formatting -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter font for clean, legible typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            background-color: #e2e8f0;
+        }
+
+        /* Standard US Letter (8.5in x 11in) Print Rules */
+        @media print {
+            @page {
+                size: letter portrait;
+                margin: 0.4in;
+            }
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-wrapper {
+                display: block !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .letter-sheet {
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                min-height: auto !important;
+                page-break-after: always;
+                break-after: page;
+            }
+            .letter-sheet:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-100">
+
+    <!-- TOP ACTION BAR (SCREEN ONLY) -->
+    <header class="no-print sticky top-0 z-50 bg-slate-900 text-white border-b border-slate-700 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <span class="bg-indigo-600 text-white text-xs font-extrabold uppercase tracking-wider px-2.5 py-1.5 rounded-lg">
+                    Math Lab • Academy
+                </span>
+                <div>
+                    <h1 class="text-sm sm:text-base font-bold leading-tight">Intervention Form Letter Generator</h1>
+                    <p class="text-[11px] text-slate-400">CA Big Ideas Algebra 1 • Batch Printable on 8.5&Prime; &times; 11&Prime; Paper</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <span id="letter-count-badge" class="bg-slate-800 border border-slate-600 text-emerald-400 text-xs font-bold px-3 py-1.5 rounded-lg">
+                    3 Letters Ready
+                </span>
+                <button type="button" onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold px-4 py-2 rounded-lg shadow transition flex items-center gap-2 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    Print All Letters (8.5&Prime; &times; 11&Prime;)
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE: LEFT BUILDER CONTROLS + RIGHT LIVE PRINT PREVIEW -->
+    <div class="print-wrapper max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- =================================================================== -->
+        <!-- LEFT SIDEBAR: TEACHER CONFIGURATION CONTROLS (HIDDEN WHEN PRINTING) -->
+        <!-- =================================================================== -->
+        <aside class="no-print lg:col-span-5 bg-white rounded-xl shadow-lg border border-slate-200 p-5 space-y-5">
+            
+            <!-- STEP 1: SCHOOL & TEACHER DETAILS -->
+            <section class="space-y-3 border-b border-slate-200 pb-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">1. School &amp; Teacher Information</h2>
+                </div>
+
+                <div>
+                    <label for="school-name-input" class="block text-xs font-semibold text-slate-700 mb-1">High School Name</label>
+                    <input type="text" id="school-name-input" oninput="generateLetters()" placeholder="e.g., Acalanes High School (leave blank for write-in line)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="teacher-name-input" class="block text-xs font-semibold text-slate-700 mb-1">Teacher Name</label>
+                        <input type="text" id="teacher-name-input" oninput="generateLetters()" value="Ms. Rivera" placeholder="e.g., Mr. Thompson" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="teacher-contact-input" class="block text-xs font-semibold text-slate-700 mb-1">Teacher Email / Contact</label>
+                        <input type="text" id="teacher-contact-input" oninput="generateLetters()" placeholder="e.g., jrivera@school.edu" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="location-input" class="block text-xs font-semibold text-slate-700 mb-1">Room / Location</label>
+                        <input type="text" id="location-input" oninput="generateLetters()" value="Room 204 (Math Lab)" placeholder="e.g., Room 112" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="time-input" class="block text-xs font-semibold text-slate-700 mb-1">Academy Session Time</label>
+                        <input type="text" id="time-input" oninput="generateLetters()" value="Academy Period (10:15 – 10:55 AM)" placeholder="e.g., Academy (10:15 – 10:55 AM)" class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+            </section>
+
+            <!-- STEP 2: PURPOSE OF MATH LAB INTRO PARAGRAPH -->
+            <section class="space-y-2 border-b border-slate-200 pb-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">2. Purpose of Math Lab (Intro Paragraph)</h2>
+                    <button type="button" onclick="resetIntroParagraph()" class="text-[11px] font-semibold text-slate-500 hover:text-indigo-600 underline cursor-pointer">
+                        Reset Default
+                    </button>
+                </div>
+                <textarea id="intro-paragraph-input" rows="4" oninput="generateLetters()" class="w-full text-xs leading-relaxed p-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">Your student has been invited to attend our Academy Math Lab for targeted academic support in Algebra 1. Math Lab is a structured, small-group intervention held during our school's Academy period to strengthen foundational math skills, build problem-solving fluency, and help students feel confident and prepared for current classroom lessons.</textarea>
+            </section>
+
+            <!-- STEP 3: DYNAMIC ATTENDANCE CALENDAR -->
+            <section class="space-y-2.5 border-b border-slate-200 pb-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">3. Select Math Lab Attendance Days</h2>
+                    <button type="button" onclick="clearSelectedDates()" class="text-[11px] font-semibold text-rose-600 hover:text-rose-700 underline cursor-pointer">
+                        Clear Dates
+                    </button>
+                </div>
+                <p class="text-[11px] text-slate-600">Click dates on the calendar below to populate the student's attendance schedule.</p>
+
+                <!-- Interactive Calendar Picker -->
+                <div class="border border-slate-300 rounded-xl p-3 bg-slate-50">
+                    <div class="flex items-center justify-between mb-2">
+                        <button type="button" onclick="changeCalendarMonth(-1)" class="p-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 cursor-pointer" title="Previous Month">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                        </button>
+                        <span id="picker-month-label" class="text-sm font-extrabold text-slate-900">November 2026</span>
+                        <button type="button" onclick="changeCalendarMonth(1)" class="p-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 cursor-pointer" title="Next Month">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-bold uppercase text-slate-500 mb-1">
+                        <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+                    </div>
+                    <div id="picker-days-grid" class="grid grid-cols-7 gap-1 text-center text-xs">
+                        <!-- Dynamically rendered calendar days -->
+                    </div>
+                </div>
+
+                <!-- Selected Dates Summary Chips -->
+                <div id="picker-selected-summary" class="text-[11px] text-slate-700 bg-indigo-50/70 border border-indigo-200 rounded-lg px-2.5 py-1.5">
+                    <!-- Dynamically populated -->
+                </div>
+            </section>
+
+            <!-- STEP 4: CA BIG IDEAS ALGEBRA 1 UNITS & PREREQUISITE SKILL CHECKBOXES -->
+            <section class="space-y-2.5 border-b border-slate-200 pb-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">4. Algebra 1 Units &amp; Prerequisite Skills</h2>
+                    <span id="selected-chapters-badge" class="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-md">
+                        1 Chapter Selected
+                    </span>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-semibold text-slate-700">Select One or More Algebra 1 Chapters:</label>
+                        <button type="button" onclick="clearSelectedChapters()" class="text-[11px] font-semibold text-slate-500 hover:text-rose-600 underline cursor-pointer">
+                            Clear Chapters
+                        </button>
+                    </div>
+                    <!-- Multi-Chapter Checkbox List -->
+                    <div id="chapter-checkbox-list" class="space-y-1 max-h-36 overflow-y-auto pr-1 border border-slate-300 rounded-lg p-2 bg-white">
+                        <!-- Dynamically populated with Chapters 1-11 -->
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-1">
+                    <span class="text-xs font-semibold text-slate-700">Select Prerequisite Focus Skills:</span>
+                    <div class="space-x-2 text-[11px]">
+                        <button type="button" onclick="toggleAllSkills(true)" class="text-indigo-600 hover:underline font-semibold cursor-pointer">Select All</button>
+                        <span class="text-slate-300">|</span>
+                        <button type="button" onclick="toggleAllSkills(false)" class="text-slate-500 hover:underline font-semibold cursor-pointer">Clear</button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Checkboxes Container (Grouped by Selected Chapters) -->
+                <div id="skills-checkbox-list" class="space-y-2 max-h-56 overflow-y-auto pr-1 border border-slate-200 rounded-lg p-2.5 bg-slate-50">
+                    <!-- Dynamically populated based on selected chapters -->
+                </div>
+
+                <!-- Add Custom Prerequisite Skill -->
+                <div class="flex gap-1.5 pt-1">
+                    <input type="text" id="custom-skill-input" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomSkill();}" placeholder="Add custom prerequisite skill..." class="flex-1 text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="button" onclick="addCustomSkill()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition cursor-pointer">
+                        + Add
+                    </button>
+                </div>
+            </section>
+
+            <!-- STEP 5: STUDENT ROSTER & BATCH GENERATION -->
+            <section class="space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">5. Student Roster (One Name Per Line)</h2>
+                    <button type="button" onclick="clearStudentRoster()" class="text-[11px] font-semibold text-slate-500 hover:text-rose-600 underline cursor-pointer">
+                        Clear List
+                    </button>
+                </div>
+                <textarea id="student-names-input" rows="4" oninput="generateLetters()" placeholder="Enter student names (one per line), e.g.&#10;Maya Lin&#10;Jordan Alvarez&#10;Ethan Patel" class="w-full text-sm p-2.5 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">Maya Lin
+Jordan Alvarez
+Ethan Patel</textarea>
+
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <button type="button" onclick="generateLetters(true)" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-bold py-2.5 px-4 rounded-lg shadow transition cursor-pointer flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Generate All Letters
+                    </button>
+                    <button type="button" onclick="generateBlankMaster()" class="bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-semibold py-2.5 px-3 rounded-lg transition cursor-pointer" title="Generate 1 blank write-in form">
+                        Blank Form
+                    </button>
+                </div>
+                <p id="generation-toast" class="text-[11px] font-semibold text-emerald-700 hidden">
+                    Updated letters in preview!
+                </p>
+            </section>
+
+        </aside>
+
+        <!-- =================================================================== -->
+        <!-- RIGHT COLUMN: GENERATED 8.5" x 11" LETTERS PREVIEW & PRINT OUTPUT   -->
+        <!-- =================================================================== -->
+        <main id="letters-output-container" class="lg:col-span-7 space-y-6 print:space-y-0">
+            <!-- Dynamically generated 8.5" x 11" letter sheets render here -->
+        </main>
+
+    </div>
+
+    <!-- APPLICATION LOGIC -->
+    <script>
+        const DEFAULT_INTRO = "Your student has been invited to attend our Academy Math Lab for targeted academic support in Algebra 1. Math Lab is a structured, small-group intervention held during our school's Academy period to strengthen foundational math skills, build problem-solving fluency, and help students feel confident and prepared for current classroom lessons.";
+
+        const MONTH_NAMES = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        const SHORT_MONTHS = [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ];
+        const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        // Safe HTML escaping utility for user-entered text
+        function escapeHTML(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        // Big Ideas Math: Algebra 1 (California Edition) Chapters & Prerequisite Skills
+        const algebra1Units = {
+            "1": {
+                title: "Chapter 1: Solving Linear Equations",
+                skills: [
+                    "Integer addition, subtraction, multiplication, and division rules",
+                    "Rational number operations (fractions and decimals)",
+                    "Order of operations and evaluating algebraic expressions",
+                    "Combining like terms and applying the distributive property",
+                    "Solving one-step and two-step linear equations",
+                    "Translating verbal phrases into algebraic equations"
+                ]
+            },
+            "2": {
+                title: "Chapter 2: Solving Linear Inequalities",
+                skills: [
+                    "Comparing and ordering positive and negative rational numbers",
+                    "Graphing inequalities on a number line (open vs. closed circles)",
+                    "Translating constraint phrases (\"at least\", \"at most\", \"fewer than\")",
+                    "Solving one-step and two-step linear inequalities",
+                    "Reversing inequality symbols when multiplying or dividing by negatives",
+                    "Testing values to verify solutions to inequalities"
+                ]
+            },
+            "3": {
+                title: "Chapter 3: Graphing Linear Functions",
+                skills: [
+                    "Plotting and identifying ordered pairs (x, y) in all four quadrants",
+                    "Evaluating linear rules and completing input-output tables",
+                    "Calculating unit rates and identifying proportional relationships (y = kx)",
+                    "Finding slope (rate of change) from two points or a table",
+                    "Identifying slope (m) and y-intercept (b) from linear equations",
+                    "Rewriting equations in slope-intercept form (y = mx + b)"
+                ]
+            },
+            "4": {
+                title: "Chapter 4: Writing Linear Functions",
+                skills: [
+                    "Simplifying fractions and finding opposite reciprocals",
+                    "Multiplying fractions by positive and negative integers",
+                    "Calculating slope from two ordered pairs with negative coordinates",
+                    "Substituting a point and slope into y = mx + b to solve for b",
+                    "Rewriting point-slope and standard form equations into slope-intercept form",
+                    "Identifying constant differences and extending arithmetic patterns"
+                ]
+            },
+            "5": {
+                title: "Chapter 5: Solving Systems of Linear Equations",
+                skills: [
+                    "Evaluating two-variable expressions for ordered pairs (x, y)",
+                    "Testing whether an ordered pair satisfies both equations in a system",
+                    "Isolating x or y in a two-variable linear equation",
+                    "Distributing and combining like terms after substituting an expression",
+                    "Scaling an entire equation by a constant multiplier",
+                    "Comparing slopes and y-intercepts to identify parallel or intersecting lines"
+                ]
+            },
+            "6": {
+                title: "Chapter 6: Exponential Functions and Sequences",
+                skills: [
+                    "Evaluating whole-number and fractional exponents using expanded form",
+                    "Applying order of operations with coefficients and exponents (a · bˣ vs. (ab)ˣ)",
+                    "Evaluating powers with negative bases vs. negative signs ((-4)² vs. -4²)",
+                    "Converting percents to decimals and decimals to percents",
+                    "Calculating single-step percent increase and decrease multipliers (1 ± r)",
+                    "Applying integer exponent properties (product, quotient, zero, and negative powers)",
+                    "Distinguishing additive change (linear) from multiplicative change (exponential)"
+                ]
+            },
+            "7": {
+                title: "Chapter 7: Polynomial Equations and Factoring",
+                skills: [
+                    "Finding integer factor pairs with a given product and sum",
+                    "Finding the Greatest Common Factor (GCF) of integers and monomials",
+                    "Using area models and the distributive property to expand products",
+                    "Adding and subtracting polynomials by combining like-degree terms",
+                    "Factoring out a positive or negative GCF from a polynomial expression",
+                    "Applying the Zero-Product Property to solve factored equations"
+                ]
+            },
+            "8": {
+                title: "Chapter 8: Graphing Quadratic Functions",
+                skills: [
+                    "Squaring positive and negative rational numbers ((-7)² vs. -7²)",
+                    "Applying order of operations when evaluating quadratic expressions (ax² + bx + c)",
+                    "Evaluating the axis of symmetry formula x = -b / (2a)",
+                    "Identifying coordinate symmetry and finding midpoints between x-values",
+                    "Completing symmetric input-output tables for parabolas",
+                    "Identifying direction of opening, vertex, and y-intercept from quadratic equations"
+                ]
+            },
+            "9": {
+                title: "Chapter 9: Solving Quadratic Equations",
+                skills: [
+                    "Evaluating principal square roots of perfect squares and fractions",
+                    "Identifying both positive and negative real solutions (±) for x² = k",
+                    "Squaring radical expressions and products such as (2√3)²",
+                    "Simplifying non-perfect square roots using perfect square factors",
+                    "Evaluating the discriminant expression b² - 4ac with signed integers",
+                    "Solving quadratic equations by factoring and the Zero-Product Property"
+                ]
+            },
+            "10": {
+                title: "Chapter 10: Radical Functions and Equations",
+                skills: [
+                    "Evaluating principal square roots and expressions of the form √(ax + b)",
+                    "Determining real-number domain restrictions (radicand ≥ 0)",
+                    "Isolating radical terms before squaring both sides of an equation",
+                    "Squaring binomial and radical expressions accurately",
+                    "Checking solutions in the original equation to identify extraneous roots",
+                    "Finding inverses of linear functions using inverse operations"
+                ]
+            },
+            "11": {
+                title: "Chapter 11: Data Analysis and Displays",
+                skills: [
+                    "Ordering numerical data sets and computing mean, median, mode, and range",
+                    "Finding lower quartile (Q1), upper quartile (Q3), and interquartile range (IQR)",
+                    "Analyzing how outliers affect measures of center and distribution skewness",
+                    "Interpreting box-and-whisker plots, histograms, and dot plots",
+                    "Converting frequency counts into decimals and percentages",
+                    "Calculating joint, marginal, and conditional relative frequencies in two-way tables"
+                ]
+            }
+        };
+
+        // Calendar State (Initialized to current month/year with 3 upcoming Academy days pre-selected)
+        const now = new Date();
+        let pickerYear = now.getFullYear();
+        let pickerMonth = now.getMonth(); // 0-indexed
+        let selectedDates = new Set();
+
+        function formatDateISO(year, monthZeroIdx, day) {
+            const m = String(monthZeroIdx + 1).padStart(2, '0');
+            const d = String(day).padStart(2, '0');
+            return `${year}-${m}-${d}`;
+        }
+
+        function parseDateISO(isoStr) {
+            const [y, m, d] = isoStr.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+
+        // Pre-populate 3 upcoming weekdays (Tue/Thu pattern) so the preview immediately demonstrates the calendar
+        (function seedInitialDates() {
+            const probe = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            let added = 0;
+            while (added < 3) {
+                const dayOfWeek = probe.getDay();
+                if (dayOfWeek === 2 || dayOfWeek === 4) { // Tuesdays & Thursdays
+                    selectedDates.add(formatDateISO(probe.getFullYear(), probe.getMonth(), probe.getDate()));
+                    added++;
+                }
+                probe.setDate(probe.getDate() + 1);
+            }
+        })();
+
+        // Multi-Chapter & Prerequisite Skills State
+        let selectedUnitIds = new Set(["6"]);
+        let initializedUnits = new Set();
+        let skillSelectionMap = {}; // Key: "unitId:skillIdx" -> boolean
+        let customSkills = []; // Array of { text, checked }
+
+        function seedUnitDefaults(unitId, defaultCount = 3) {
+            if (initializedUnits.has(unitId)) return;
+            initializedUnits.add(unitId);
+            const unit = algebra1Units[unitId];
+            if (!unit) return;
+            unit.skills.forEach((_, idx) => {
+                skillSelectionMap[`${unitId}:${idx}`] = idx < defaultCount;
+            });
+        }
+
+        // Seed initial default skills for Chapter 6
+        seedUnitDefaults("6", 3);
+
+        // Interactive Calendar Picker Handlers
+        function renderPickerCalendar() {
+            const monthLabel = document.getElementById('picker-month-label');
+            const daysGrid = document.getElementById('picker-days-grid');
+            const summaryBox = document.getElementById('picker-selected-summary');
+
+            monthLabel.textContent = `${MONTH_NAMES[pickerMonth]} ${pickerYear}`;
+
+            const firstWeekday = new Date(pickerYear, pickerMonth, 1).getDay();
+            const daysInMonth = new Date(pickerYear, pickerMonth + 1, 0).getDate();
+
+            let cellsHTML = '';
+
+            // Leading blank cells
+            for (let i = 0; i < firstWeekday; i++) {
+                cellsHTML += `<div class="h-7"></div>`;
+            }
+
+            // Month day buttons
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isoStr = formatDateISO(pickerYear, pickerMonth, day);
+                const weekday = new Date(pickerYear, pickerMonth, day).getDay();
+                const isWeekend = weekday === 0 || weekday === 6;
+                const isSelected = selectedDates.has(isoStr);
+
+                let btnClass = 'h-7 w-full rounded-lg font-semibold transition cursor-pointer flex items-center justify-center ';
+                if (isSelected) {
+                    btnClass += 'bg-indigo-600 text-white font-extrabold shadow-sm ring-2 ring-indigo-300';
+                } else if (isWeekend) {
+                    btnClass += 'text-slate-400 hover:bg-slate-200/70';
+                } else {
+                    btnClass += 'bg-white text-slate-800 border border-slate-200 hover:border-indigo-400 hover:bg-indigo-50';
+                }
+
+                cellsHTML += `
+                    <button type="button" onclick="toggleDateSelection('${isoStr}')" class="${btnClass}">
+                        ${day}
+                    </button>
+                `;
+            }
+
+            daysGrid.innerHTML = cellsHTML;
+
+            // Update Selected Dates Summary
+            const sortedDates = Array.from(selectedDates).sort();
+            if (sortedDates.length === 0) {
+                summaryBox.innerHTML = `<span class="text-slate-500 italic">No dates selected yet. Blank write-in lines will appear on the letter.</span>`;
+            } else {
+                const formattedChips = sortedDates.map(iso => {
+                    const dt = parseDateISO(iso);
+                    const label = `${SHORT_DAYS[dt.getDay()]}, ${SHORT_MONTHS[dt.getMonth()]} ${dt.getDate()}`;
+                    return `<span class="inline-flex items-center gap-1 bg-white border border-indigo-300 text-indigo-900 font-bold px-2 py-0.5 rounded-md shadow-2xs">${label}</span>`;
+                }).join(' ');
+
+                summaryBox.innerHTML = `
+                    <div class="font-bold text-indigo-900 mb-1">${sortedDates.length} Session${sortedDates.length === 1 ? '' : 's'} Selected:</div>
+                    <div class="flex flex-wrap gap-1">${formattedChips}</div>
+                `;
+            }
+        }
+
+        function changeCalendarMonth(delta) {
+            pickerMonth += delta;
+            if (pickerMonth < 0) {
+                pickerMonth = 11;
+                pickerYear -= 1;
+            } else if (pickerMonth > 11) {
+                pickerMonth = 0;
+                pickerYear += 1;
+            }
+            renderPickerCalendar();
+        }
+
+        function toggleDateSelection(isoStr) {
+            if (selectedDates.has(isoStr)) {
+                selectedDates.delete(isoStr);
+            } else {
+                selectedDates.add(isoStr);
+            }
+            renderPickerCalendar();
+            generateLetters();
+        }
+
+        function clearSelectedDates() {
+            selectedDates.clear();
+            renderPickerCalendar();
+            generateLetters();
+        }
+
+        // Build Mini-Calendar HTML for Printed Form Letters
+        function buildLetterMiniCalendarsHTML() {
+            const sortedDates = Array.from(selectedDates).sort();
+
+            if (sortedDates.length === 0) {
+                return `
+                    <div class="space-y-2 py-1">
+                        <p class="text-[11px] text-slate-600 italic">Please attend Math Lab on the following dates:</p>
+                        <div class="space-y-2 pt-1 text-xs font-semibold text-slate-800">
+                            <div class="flex items-end"><span>1.</span><div class="flex-1 border-b border-slate-500 ml-1.5 h-4"></div></div>
+                            <div class="flex items-end"><span>2.</span><div class="flex-1 border-b border-slate-500 ml-1.5 h-4"></div></div>
+                            <div class="flex items-end"><span>3.</span><div class="flex-1 border-b border-slate-500 ml-1.5 h-4"></div></div>
+                            <div class="flex items-end"><span>4.</span><div class="flex-1 border-b border-slate-500 ml-1.5 h-4"></div></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Group selected dates by YYYY-MM
+            const monthGroups = new Map();
+            sortedDates.forEach(iso => {
+                const [y, m] = iso.split('-').map(Number);
+                const key = `${y}-${String(m).padStart(2, '0')}`;
+                if (!monthGroups.has(key)) {
+                    monthGroups.set(key, { year: y, monthZeroIdx: m - 1 });
+                }
+            });
+
+            // Render up to 2 mini-month calendars cleanly
+            const monthsToShow = Array.from(monthGroups.values()).slice(0, 2);
+            const calendarsHTML = monthsToShow.map(({ year, monthZeroIdx }) => {
+                const firstWeekday = new Date(year, monthZeroIdx, 1).getDay();
+                const daysInMonth = new Date(year, monthZeroIdx + 1, 0).getDate();
+
+                let cells = '';
+                for (let i = 0; i < firstWeekday; i++) {
+                    cells += `<div class="h-4"></div>`;
+                }
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const iso = formatDateISO(year, monthZeroIdx, d);
+                    const isPicked = selectedDates.has(iso);
+                    const style = isPicked
+                        ? 'bg-slate-900 text-white font-extrabold rounded-sm ring-1 ring-slate-900'
+                        : 'text-slate-700';
+                    cells += `<div class="h-4 flex items-center justify-center text-[10px] ${style}">${d}</div>`;
+                }
+
+                return `
+                    <div class="border border-slate-300 rounded p-1.5 bg-white">
+                        <div class="text-[10px] font-extrabold uppercase tracking-wide text-center text-slate-900 border-b border-slate-200 pb-0.5 mb-1">
+                            ${MONTH_NAMES[monthZeroIdx]} ${year}
+                        </div>
+                        <div class="grid grid-cols-7 gap-0.5 text-center text-[8px] font-bold text-slate-500 mb-0.5">
+                            <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                        </div>
+                        <div class="grid grid-cols-7 gap-0.5 text-center">
+                            ${cells}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Explicit list of formatted dates below the mini calendar
+            const dateBadgesHTML = sortedDates.map(iso => {
+                const dt = parseDateISO(iso);
+                const label = `${SHORT_DAYS[dt.getDay()]}, ${SHORT_MONTHS[dt.getMonth()]} ${dt.getDate()}`;
+                return `<span class="inline-block bg-slate-100 border border-slate-400 text-slate-900 text-[10px] font-bold px-1.5 py-0.5 rounded">${label}</span>`;
+            }).join(' ');
+
+            return `
+                <div class="space-y-2">
+                    <div class="space-y-2">
+                        ${calendarsHTML}
+                    </div>
+                    <div class="pt-1 border-t border-slate-200">
+                        <div class="text-[10px] font-bold uppercase tracking-wide text-slate-700 mb-1">
+                            Assigned Dates (${sortedDates.length}):
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                            ${dateBadgesHTML}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Multi-Chapter & Prerequisite Skills Handlers
+        function renderChapterSelector() {
+            const container = document.getElementById('chapter-checkbox-list');
+            const badge = document.getElementById('selected-chapters-badge');
+            const count = selectedUnitIds.size;
+
+            badge.textContent = `${count} ${count === 1 ? 'Chapter' : 'Chapters'} Selected`;
+            container.innerHTML = '';
+
+            Object.keys(algebra1Units)
+                .sort((a, b) => Number(a) - Number(b))
+                .forEach(unitId => {
+                    const unit = algebra1Units[unitId];
+                    const isChecked = selectedUnitIds.has(unitId);
+                    const rowStyle = isChecked
+                        ? 'bg-indigo-50/90 border-indigo-300 text-indigo-950 font-semibold'
+                        : 'border-transparent hover:bg-slate-50 text-slate-700';
+
+                    container.insertAdjacentHTML('beforeend', `
+                        <label class="flex items-center gap-2 px-2 py-1 rounded-md border transition cursor-pointer text-xs ${rowStyle}">
+                            <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleChapterSelection('${unitId}')" class="rounded border-slate-400 text-indigo-600 focus:ring-indigo-500 cursor-pointer shrink-0">
+                            <span class="leading-snug truncate" title="${escapeHTML(unit.title)}">${escapeHTML(unit.title)}</span>
+                        </label>
+                    `);
+                });
+        }
+
+        function toggleChapterSelection(unitId) {
+            if (selectedUnitIds.has(unitId)) {
+                selectedUnitIds.delete(unitId);
+            } else {
+                selectedUnitIds.add(unitId);
+                seedUnitDefaults(unitId, selectedUnitIds.size === 1 ? 3 : 2);
+            }
+            renderChapterSelector();
+            renderSkillsCheckboxes();
+            generateLetters();
+        }
+
+        function clearSelectedChapters() {
+            selectedUnitIds.clear();
+            renderChapterSelector();
+            renderSkillsCheckboxes();
+            generateLetters();
+        }
+
+        function renderSkillsCheckboxes() {
+            const container = document.getElementById('skills-checkbox-list');
+            container.innerHTML = '';
+
+            const activeUnits = Array.from(selectedUnitIds).sort((a, b) => Number(a) - Number(b));
+
+            if (activeUnits.length === 0 && customSkills.length === 0) {
+                container.innerHTML = `
+                    <p class="text-[11px] text-slate-500 italic py-2 text-center">
+                        Select one or more chapters above to choose prerequisite focus skills, or add a custom skill below.
+                    </p>
+                `;
+                return;
+            }
+
+            activeUnits.forEach(unitId => {
+                const unit = algebra1Units[unitId];
+                const groupHTML = unit.skills.map((skillText, idx) => {
+                    const key = `${unitId}:${idx}`;
+                    const checked = Boolean(skillSelectionMap[key]);
+                    return `
+                        <label class="flex items-start gap-2 p-1 rounded-md hover:bg-white transition cursor-pointer text-xs text-slate-800">
+                            <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleUnitSkillCheckbox('${unitId}', ${idx})" class="mt-0.5 rounded border-slate-400 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            <span class="leading-snug">${escapeHTML(skillText)}</span>
+                        </label>
+                    `;
+                }).join('');
+
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="space-y-1">
+                        <div class="text-[11px] font-extrabold text-indigo-900 bg-indigo-100/70 border border-indigo-200 px-2 py-1 rounded-md">
+                            ${escapeHTML(unit.title)}
+                        </div>
+                        <div class="space-y-0.5 pl-0.5">
+                            ${groupHTML}
+                        </div>
+                    </div>
+                `);
+            });
+
+            if (customSkills.length > 0) {
+                const customHTML = customSkills.map((skill, idx) => `
+                    <div class="flex items-start justify-between gap-2 p-1 rounded-md hover:bg-white transition text-xs text-slate-800">
+                        <label class="flex items-start gap-2 cursor-pointer flex-1">
+                            <input type="checkbox" ${skill.checked ? 'checked' : ''} onchange="toggleCustomSkillCheckbox(${idx})" class="mt-0.5 rounded border-slate-400 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            <span class="leading-snug">${escapeHTML(skill.text)}</span>
+                        </label>
+                        <button type="button" onclick="removeCustomSkill(${idx})" class="text-[10px] text-slate-400 hover:text-rose-600 px-1 cursor-pointer" title="Remove custom skill">&times;</button>
+                    </div>
+                `).join('');
+
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="space-y-1 pt-1">
+                        <div class="text-[11px] font-extrabold text-slate-800 bg-slate-200/80 border border-slate-300 px-2 py-1 rounded-md">
+                            Custom Prerequisite Skills
+                        </div>
+                        <div class="space-y-0.5 pl-0.5">
+                            ${customHTML}
+                        </div>
+                    </div>
+                `);
+            }
+        }
+
+        function toggleUnitSkillCheckbox(unitId, idx) {
+            const key = `${unitId}:${idx}`;
+            skillSelectionMap[key] = !skillSelectionMap[key];
+            generateLetters();
+        }
+
+        function toggleCustomSkillCheckbox(idx) {
+            customSkills[idx].checked = !customSkills[idx].checked;
+            generateLetters();
+        }
+
+        function removeCustomSkill(idx) {
+            customSkills.splice(idx, 1);
+            renderSkillsCheckboxes();
+            generateLetters();
+        }
+
+        function toggleAllSkills(state) {
+            selectedUnitIds.forEach(unitId => {
+                algebra1Units[unitId].skills.forEach((_, idx) => {
+                    skillSelectionMap[`${unitId}:${idx}`] = state;
+                });
+            });
+            customSkills.forEach(s => s.checked = state);
+            renderSkillsCheckboxes();
+            generateLetters();
+        }
+
+        function addCustomSkill() {
+            const input = document.getElementById('custom-skill-input');
+            const val = input.value.trim();
+            if (!val) return;
+            customSkills.push({ text: val, checked: true });
+            input.value = '';
+            renderSkillsCheckboxes();
+            generateLetters();
+        }
+
+        function resetIntroParagraph() {
+            document.getElementById('intro-paragraph-input').value = DEFAULT_INTRO;
+            generateLetters();
+        }
+
+        function clearStudentRoster() {
+            document.getElementById('student-names-input').value = '';
+            generateLetters();
+        }
+
+        function generateBlankMaster() {
+            document.getElementById('student-names-input').value = '';
+            generateLetters(true);
+        }
+
+        // Generate All Student Form Letters
+        function generateLetters(showFeedback = false) {
+            const schoolName = document.getElementById('school-name-input').value.trim();
+            const teacherName = document.getElementById('teacher-name-input').value.trim();
+            const teacherContact = document.getElementById('teacher-contact-input').value.trim();
+            const location = document.getElementById('location-input').value.trim();
+            const sessionTime = document.getElementById('time-input').value.trim();
+            const introText = document.getElementById('intro-paragraph-input').value.trim() || DEFAULT_INTRO;
+            const activeUnits = Array.from(selectedUnitIds).sort((a, b) => Number(a) - Number(b));
+
+            // Parse Student Roster (one per line)
+            const rawRoster = document.getElementById('student-names-input').value;
+            const parsedNames = rawRoster
+                .split(/\r?\n/)
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+
+            const isBlankMaster = parsedNames.length === 0;
+            const studentList = isBlankMaster ? [''] : parsedNames;
+
+            // Update Top Badge Count
+            const badge = document.getElementById('letter-count-badge');
+            badge.textContent = isBlankMaster
+                ? '1 Blank Form Ready'
+                : `${studentList.length} ${studentList.length === 1 ? 'Letter' : 'Letters'} Ready`;
+
+            const schoolHeaderHTML = schoolName
+                ? `<div class="text-xs font-extrabold uppercase tracking-widest text-slate-700">${escapeHTML(schoolName)}</div>`
+                : `<div class="text-xs font-bold text-slate-700 flex items-end"><span>School:</span><span class="inline-block w-52 border-b border-slate-700 ml-1.5 h-3.5"></span></div>`;
+
+            const teacherDisplay = teacherName
+                ? escapeHTML(teacherName)
+                : `<span class="inline-block w-32 border-b border-slate-700 h-3.5 align-bottom"></span>`;
+
+            const contactDisplay = teacherContact
+                ? ` &bull; ${escapeHTML(teacherContact)}`
+                : ``;
+
+            const locationDisplay = location
+                ? escapeHTML(location)
+                : `<span class="inline-block w-32 border-b border-slate-700 h-3.5 align-bottom"></span>`;
+
+            const timeDisplay = sessionTime
+                ? escapeHTML(sessionTime)
+                : `<span class="inline-block w-36 border-b border-slate-700 h-3.5 align-bottom"></span>`;
+
+            const todayFormatted = new Date().toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+            });
+
+            // Build Unit Header(s) & Checked Prerequisite Skills HTML
+            const checkedCustomSkills = customSkills.filter(s => s.checked);
+            let unitsAndSkillsHTML = '';
+
+            if (activeUnits.length === 0) {
+                const customBullets = checkedCustomSkills.length > 0
+                    ? checkedCustomSkills.map(s => `
+                        <li class="flex items-start gap-2 text-xs text-slate-900 leading-snug">
+                            <span class="inline-flex items-center justify-center w-3.5 h-3.5 mt-0.5 border border-slate-900 bg-slate-100 rounded-sm text-[10px] font-extrabold shrink-0">&#10003;</span>
+                            <span>${escapeHTML(s.text)}</span>
+                        </li>
+                    `).join('')
+                    : `
+                        <li class="border-b border-slate-400 h-5"></li>
+                        <li class="border-b border-slate-400 h-5"></li>
+                        <li class="border-b border-slate-400 h-5"></li>
+                    `;
+
+                unitsAndSkillsHTML = `
+                    <div class="text-xs font-extrabold text-slate-900 bg-slate-100 border border-slate-300 px-2.5 py-1 rounded mb-2">
+                        Algebra 1 Prerequisite Focus Areas
+                    </div>
+                    <p class="text-[11px] font-semibold text-slate-700 mb-1.5">
+                        During Math Lab, we will practice and reinforce the following foundational skills:
+                    </p>
+                    <ul class="space-y-1.5">
+                        ${customBullets}
+                    </ul>
+                `;
+            } else if (activeUnits.length === 1) {
+                const unitId = activeUnits[0];
+                const unit = algebra1Units[unitId];
+                const selectedSkills = unit.skills
+                    .filter((_, idx) => Boolean(skillSelectionMap[`${unitId}:${idx}`]))
+                    .concat(checkedCustomSkills.map(s => s.text));
+
+                let skillsListHTML = '';
+                if (selectedSkills.length > 0) {
+                    skillsListHTML = selectedSkills.map(text => `
+                        <li class="flex items-start gap-2 text-xs text-slate-900 leading-snug">
+                            <span class="inline-flex items-center justify-center w-3.5 h-3.5 mt-0.5 border border-slate-900 bg-slate-100 rounded-sm text-[10px] font-extrabold shrink-0">&#10003;</span>
+                            <span>${escapeHTML(text)}</span>
+                        </li>
+                    `).join('');
+                } else {
+                    skillsListHTML = unit.skills.slice(0, 5).map(text => `
+                        <li class="flex items-start gap-2 text-xs text-slate-800 leading-snug">
+                            <span class="inline-block w-3.5 h-3.5 mt-0.5 border border-slate-700 rounded-sm shrink-0"></span>
+                            <span>${escapeHTML(text)}</span>
+                        </li>
+                    `).join('');
+                }
+
+                unitsAndSkillsHTML = `
+                    <div class="text-xs font-extrabold text-slate-900 bg-slate-100 border border-slate-300 px-2.5 py-1 rounded mb-2">
+                        ${escapeHTML(unit.title)}
+                    </div>
+                    <p class="text-[11px] font-semibold text-slate-700 mb-1.5">
+                        During Math Lab, we will practice and reinforce the following foundational skills:
+                    </p>
+                    <ul class="space-y-1.5">
+                        ${skillsListHTML}
+                    </ul>
+                `;
+            } else {
+                // Multiple Chapters Selected: Show compact chapter badges + grouped skills per chapter
+                const chapterBadgesHTML = activeUnits.map(unitId =>
+                    `<span class="inline-block bg-slate-100 border border-slate-400 text-slate-900 text-[10px] font-extrabold px-2 py-0.5 rounded">Ch. ${unitId}</span>`
+                ).join(' ');
+
+                const groupedSectionsHTML = activeUnits.map(unitId => {
+                    const unit = algebra1Units[unitId];
+                    const checkedTexts = unit.skills.filter((_, idx) => Boolean(skillSelectionMap[`${unitId}:${idx}`]));
+                    const bulletsHTML = checkedTexts.length > 0
+                        ? checkedTexts.map(text => `
+                            <li class="flex items-start gap-1.5 text-[11px] text-slate-900 leading-snug">
+                                <span class="inline-flex items-center justify-center w-3 h-3 mt-0.5 border border-slate-900 bg-slate-100 rounded-sm text-[9px] font-extrabold shrink-0">&#10003;</span>
+                                <span>${escapeHTML(text)}</span>
+                            </li>
+                        `).join('')
+                        : `<li class="text-[10px] text-slate-500 italic pl-1">General unit review &amp; prerequisite fluency</li>`;
+
+                    return `
+                        <div class="mb-2 last:mb-0">
+                            <div class="text-[11px] font-extrabold text-slate-900 border-b border-slate-300 pb-0.5 mb-1">
+                                ${escapeHTML(unit.title)}
+                            </div>
+                            <ul class="space-y-1">
+                                ${bulletsHTML}
+                            </ul>
+                        </div>
+                    `;
+                }).join('');
+
+                const customGroupHTML = checkedCustomSkills.length > 0
+                    ? `
+                        <div class="mt-2 pt-1 border-t border-slate-200">
+                            <div class="text-[11px] font-extrabold text-slate-900 mb-1">Additional Focus Skills</div>
+                            <ul class="space-y-1">
+                                ${checkedCustomSkills.map(s => `
+                                    <li class="flex items-start gap-1.5 text-[11px] text-slate-900 leading-snug">
+                                        <span class="inline-flex items-center justify-center w-3 h-3 mt-0.5 border border-slate-900 bg-slate-100 rounded-sm text-[9px] font-extrabold shrink-0">&#10003;</span>
+                                        <span>${escapeHTML(s.text)}</span>
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    `
+                    : '';
+
+                unitsAndSkillsHTML = `
+                    <div class="flex flex-wrap items-center gap-1 bg-slate-100 border border-slate-300 px-2 py-1 rounded mb-2">
+                        <span class="text-[11px] font-extrabold text-slate-900 mr-1">Focus Units:</span>
+                        ${chapterBadgesHTML}
+                    </div>
+                    <div class="space-y-1.5">
+                        ${groupedSectionsHTML}
+                        ${customGroupHTML}
+                    </div>
+                `;
+            }
+
+            const miniCalendarsHTML = buildLetterMiniCalendarsHTML();
+            const container = document.getElementById('letters-output-container');
+
+            container.innerHTML = studentList.map(studentName => {
+                const studentFieldHTML = studentName
+                    ? `<span class="text-sm font-extrabold text-slate-900 underline decoration-slate-400 underline-offset-4">${escapeHTML(studentName)}</span>`
+                    : `<span class="inline-block w-48 border-b-2 border-slate-900 h-4 align-bottom"></span>`;
+
+                return `
+                    <article class="letter-sheet bg-white shadow-xl rounded-xl border border-slate-300 p-7 sm:p-8 min-h-[10.1in] flex flex-col justify-between gap-3">
+                        
+                        <!-- TOP & MIDDLE SECTIONS -->
+                        <div class="space-y-3">
+                            
+                            <!-- LETTERHEAD HEADER -->
+                            <header class="border-b-2 border-slate-900 pb-2.5">
+                                <div class="flex flex-wrap items-start justify-between gap-2 mb-1">
+                                    ${schoolHeaderHTML}
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider bg-slate-900 text-white px-2.5 py-0.5 rounded">
+                                        Algebra 1 Academic Support Notice
+                                    </span>
+                                </div>
+                                <h2 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
+                                    Academy Math Lab — Student Invitation &amp; Schedule
+                                </h2>
+                                <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-700 mt-1">
+                                    <div><strong>Teacher:</strong> ${teacherDisplay}${contactDisplay}</div>
+                                    <div><strong>Date Issued:</strong> ${todayFormatted}</div>
+                                </div>
+                            </header>
+
+                            <!-- STUDENT & SESSION LOGISTICS BOX -->
+                            <section class="grid grid-cols-12 gap-2.5 bg-slate-50 border border-slate-400 rounded-lg px-3 py-2 text-xs">
+                                <div class="col-span-12 sm:col-span-5 flex items-center gap-1.5">
+                                    <span class="font-bold text-slate-700 uppercase text-[10px] tracking-wider shrink-0">Student:</span>
+                                    ${studentFieldHTML}
+                                </div>
+                                <div class="col-span-12 sm:col-span-4 flex items-center gap-1">
+                                    <span class="font-bold text-slate-700 uppercase text-[10px] tracking-wider shrink-0">Room:</span>
+                                    <span class="font-bold text-slate-900">${locationDisplay}</span>
+                                </div>
+                                <div class="col-span-12 sm:col-span-3 flex items-center gap-1">
+                                    <span class="font-bold text-slate-700 uppercase text-[10px] tracking-wider shrink-0">Time:</span>
+                                    <span class="font-semibold text-slate-900">${timeDisplay}</span>
+                                </div>
+                            </section>
+
+                            <!-- PURPOSE OF MATH LAB INTRO PARAGRAPH -->
+                            <section class="text-xs leading-relaxed text-slate-800 px-0.5">
+                                <p class="font-semibold text-slate-900 mb-1">Dear Parent / Guardian,</p>
+                                <p>${escapeHTML(introText)}</p>
+                            </section>
+
+                            <!-- TWO-COLUMN BODY: ATTENDANCE SCHEDULE (LEFT) & FOCUS SKILLS (RIGHT) -->
+                            <section class="grid grid-cols-12 gap-3 items-stretch">
+                                
+                                <!-- LEFT CARD: ATTENDANCE CALENDAR -->
+                                <div class="col-span-5 border border-slate-400 rounded-lg overflow-hidden flex flex-col bg-white">
+                                    <div class="bg-slate-900 text-white px-2.5 py-1.5 flex items-center justify-between">
+                                        <h3 class="text-[11px] font-extrabold uppercase tracking-wider">Attendance Schedule</h3>
+                                    </div>
+                                    <div class="p-2.5 flex-1 flex flex-col justify-between">
+                                        ${miniCalendarsHTML}
+                                        <p class="mt-2 pt-1.5 border-t border-slate-200 text-[10px] text-slate-600 leading-snug">
+                                            Students should report directly to <strong>${location ? escapeHTML(location) : 'Math Lab'}</strong> at the start of Academy.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- RIGHT CARD: ALGEBRA 1 PREREQUISITE FOCUS SKILLS -->
+                                <div class="col-span-7 border border-slate-400 rounded-lg overflow-hidden flex flex-col bg-white">
+                                    <div class="bg-slate-900 text-white px-2.5 py-1.5 flex items-center justify-between">
+                                        <h3 class="text-[11px] font-extrabold uppercase tracking-wider">Algebra 1 Prerequisite Focus</h3>
+                                    </div>
+                                    <div class="p-3 flex-1 flex flex-col justify-between">
+                                        <div>
+                                            ${unitsAndSkillsHTML}
+                                        </div>
+
+                                        <div class="mt-3 pt-2 border-t border-slate-200 text-[11px] text-slate-700">
+                                            <strong>Materials to Bring:</strong> Algebra 1 binder/notebook, pencil, and charged Chromebook.
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </section>
+                        </div>
+
+                        <!-- BOTTOM: PARENT FEEDBACK, COMMENTS & SIGNATURE SECTION -->
+                        <section class="border-2 border-slate-900 rounded-lg p-3.5 bg-white">
+                            <div class="flex items-center justify-between border-b border-slate-400 pb-1.5 mb-2">
+                                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-900">
+                                    Parent / Guardian Acknowledgment, Feedback &amp; Signature
+                                </h3>
+                                <span class="text-[10px] font-bold uppercase text-slate-600">Please Sign &amp; Return</span>
+                            </div>
+
+                            <p class="text-[11px] text-slate-700 mb-2 leading-snug">
+                                Please review the scheduled Academy Math Lab dates above with your student, share any questions or comments below, and return this signed notice to <strong>${teacherName ? escapeHTML(teacherName) : 'your Algebra 1 teacher'}</strong>.
+                            </p>
+
+                            <!-- Quick Parent Checkboxes -->
+                            <div class="flex flex-wrap gap-x-5 gap-y-1 text-[11px] text-slate-800 mb-2.5">
+                                <label class="inline-flex items-center gap-1.5">
+                                    <span class="inline-block w-3.5 h-3.5 border border-slate-800 rounded-sm"></span>
+                                    <span>I have reviewed the Math Lab dates with my student.</span>
+                                </label>
+                                <label class="inline-flex items-center gap-1.5">
+                                    <span class="inline-block w-3.5 h-3.5 border border-slate-800 rounded-sm"></span>
+                                    <span>Please contact me to discuss my student's progress.</span>
+                                </label>
+                            </div>
+
+                            <!-- Parent Feedback / Comments Lines -->
+                            <div class="mb-3">
+                                <div class="text-[11px] font-bold text-slate-800 mb-1">Parent / Guardian Feedback or Comments:</div>
+                                <div class="border-b border-slate-500 h-5"></div>
+                                <div class="border-b border-slate-500 h-5"></div>
+                                <div class="border-b border-slate-500 h-5"></div>
+                            </div>
+
+                            <!-- Signatures & Contact Grid -->
+                            <div class="grid grid-cols-12 gap-x-4 gap-y-2.5 text-xs font-semibold text-slate-900 pt-1">
+                                <div class="col-span-8 flex items-end">
+                                    <span class="shrink-0">Parent/Guardian Signature:</span>
+                                    <div class="flex-1 border-b border-slate-900 ml-1.5 h-4"></div>
+                                </div>
+                                <div class="col-span-4 flex items-end">
+                                    <span class="shrink-0">Date:</span>
+                                    <div class="flex-1 border-b border-slate-900 ml-1.5 h-4"></div>
+                                </div>
+
+                                <div class="col-span-6 flex items-end">
+                                    <span class="shrink-0">Parent Phone / Email:</span>
+                                    <div class="flex-1 border-b border-slate-900 ml-1.5 h-4"></div>
+                                </div>
+                                <div class="col-span-6 flex items-end">
+                                    <span class="shrink-0">Student Signature:</span>
+                                    <div class="flex-1 border-b border-slate-900 ml-1.5 h-4"></div>
+                                </div>
+                            </div>
+                        </section>
+
+                    </article>
+                `;
+            }).join('');
+
+            if (showFeedback) {
+                const toast = document.getElementById('generation-toast');
+                toast.classList.remove('hidden');
+                setTimeout(() => toast.classList.add('hidden'), 2500);
+            }
+        }
+
+        // Initialize application on load
+        renderPickerCalendar();
+        renderChapterSelector();
+        renderSkillsCheckboxes();
+        generateLetters();
+    </script>
+</body>
+</html>
